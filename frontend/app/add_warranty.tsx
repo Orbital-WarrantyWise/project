@@ -7,7 +7,7 @@ export default function AddWarranty() {
   const [purchaseDate, setPurchaseDate] = useState('');
   const [expirationDate, setExpirationDate] = useState('');
 
-  const handleButton = () => {
+  const handleButton = async () => {
     const data = {
       product_name: productName,
       product_categories: productCategories.split(','),
@@ -15,6 +15,13 @@ export default function AddWarranty() {
       expiration_date: expirationDate,
     };
     console.log('Form Data is', data);
+    const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + "/warranty", {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const json = await res.json();
+    console.log('Backend Response is', res.status, json);
   };
 
   return (
