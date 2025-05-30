@@ -21,6 +21,18 @@ app.post("/warranty", async (req, res) => {
   res.status(200);
 });
 
+app.get("/warranty", async (req, res) => {
+  console.log("Recieved Body", req.body);
+  const { data, error } = await supabase.from("warranties").select(); // Supabase returns error not err lol
+  console.log("Supabase Response", data, error);
+  if (error) {
+    return res.status(400).json(error);
+  }
+  res.json(data);
+});
+
+
+
 app.get('/healthcheck', (req, res) => {
   res.send(`Backend is up! Server time is ${new Date().toString()}`)
 })
