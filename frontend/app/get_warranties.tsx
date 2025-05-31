@@ -22,7 +22,7 @@ export default function GetWarranties() {
     });
     const json = await res.json();
     console.log('Backend Response is', res.status, json);
-    setWarranties(json);
+    setWarranties(json["data"]);
   };
 
   return (

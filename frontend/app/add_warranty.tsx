@@ -1,7 +1,8 @@
-import { StyleSheet, View, Text, TextInput, Button } from "react-native";
+import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from "react-native";
 import { useState } from 'react';
 import { DatePickerModal } from "react-native-paper-dates"; // Tried https://github.com/react-native-datetimepicker/datetimepicker and https://github.com/mmazzarolo/react-native-modal-datetime-picker, but both don't work on Web
 import { format } from 'date-fns';
+import FlashMessage, { showMessage } from 'react-native-flash-message';
 
 export default function AddWarranty() {
   const [productName, setProductName] = useState('');
@@ -10,12 +11,15 @@ export default function AddWarranty() {
   const [purchaseDate, setPurchaseDate] = useState(new Date());
   const [openExpirationDatePicker, setOpenExpirationDatePicker] = useState(false);
   const [expirationDate, setExpirationDate] = useState(new Date());
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   const formatDate = (date: Date) => {
     return format(date, 'yyyy-MM-dd'); // Ref: https://date-fns.org/docs/format
   };
 
   const handleSubmitButton = async () => {
+    if (submitLoading) return; // Just in case
+    setSubmitLoading(true);
     const data = {
       product_name: productName,
       product_categories: productCategories.split(','),
@@ -30,6 +34,12 @@ export default function AddWarranty() {
     });
     const json = await res.json();
     console.log('Backend Response is', res.status, json);
+    if (json["success"]) {
+      showMessage({ type: 'success', message: 'Successfully Added Warranty!'});
+    } else {
+      showMessage({ type: 'danger', message: 'Failed to Add Warranty!'});
+    }
+    setSubmitLoading(false);
   };
 
   const styleSheet = StyleSheet.create({
@@ -115,8 +125,13 @@ export default function AddWarranty() {
       />
 
       <View style={styleSheet.submitButtonViewWrapper}>
-        <Button title="Add Warranty" onPress={handleSubmitButton} />
+        { submitLoading ?
+          <ActivityIndicator size="small" /> :
+          <Button title="Add Warranty" onPress={handleSubmitButton} />
+        }
       </View>
+
+      <FlashMessage position="top" />
     </View>
   );
 }
