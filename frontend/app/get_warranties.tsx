@@ -1,4 +1,4 @@
-import { View, Button, FlatList, Text } from "react-native";
+import { StyleSheet, View, Button, FlatList, Text } from "react-native";
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useState } from "react";
 
@@ -11,10 +11,18 @@ interface Warranty {
   expiration_date: string;
 }
 
+const TABLE_HEADERS = [
+  { key: 'id', label: 'ID' },
+  { key: 'product_name', label: 'Product Name' },
+  { key: 'product_categories', label: 'Product Categories' },
+  { key: 'purchase_date', label: 'Purchase Date' },
+  { key: 'expiration_date', label: 'Expiry Date' },
+];
+
 export default function GetWarranties() {
   const [warranties, setWarranties] = useState<Warranty[]>();
 
-  const handleButton = async () => {
+  const handleLoadButton = async () => {
     console.log('Sending Request to Backend...')
     const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + "/warranty", {
       method: 'GET',
@@ -25,15 +33,41 @@ export default function GetWarranties() {
     setWarranties(json["data"]);
   };
 
+  const styleSheet = StyleSheet.create({
+    table_row: {
+      flexDirection: 'row', // Overflow <Text> blocks horizontally instead of vertically
+      borderBottomWidth: 1 // Only draw bottom border to prevent overlap
+    },
+    table_cell: {
+      padding: 5,
+      borderRightWidth: 1 // Only draw right border to prevent overlap
+    }
+  });
+
   return (
     <View>
-      <Button title="Load" onPress={handleButton} />
+      <Button title="Load" onPress={handleLoadButton} />
       <SafeAreaProvider>
         <SafeAreaView>
           <FlatList
             data={warranties}
+            ListHeaderComponent={() => (
+              <View style={styleSheet.table_row}>
+                {
+                  TABLE_HEADERS.map((col) => (
+                    <Text style={styleSheet.table_cell}>{col.label}</Text>
+                  ))
+                }
+              </View>
+            )}
             renderItem={({item}) => (
-                <Text>{item.id} {item.product_name} {item.product_categories} {item.purchase_date} {item.expiration_date}</Text>
+              <View style={styleSheet.table_row}>
+                <Text style={styleSheet.table_cell}>{item.id}</Text>
+                <Text style={styleSheet.table_cell}>{item.product_name}</Text>
+                <Text style={styleSheet.table_cell}>{item.product_categories}</Text>
+                <Text style={styleSheet.table_cell}>{item.purchase_date}</Text>
+                <Text style={styleSheet.table_cell}>{item.expiration_date}</Text>
+              </View>
             )}
             keyExtractor={item => item.id.toString()}
           />

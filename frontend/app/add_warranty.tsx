@@ -125,7 +125,8 @@ export default function AddWarranty() {
       />
 
       <View style={styleSheet.submitButtonViewWrapper}>
-        { submitLoading ?
+        {
+          submitLoading ?
           <ActivityIndicator size="small" /> :
           <Button title="Add Warranty" onPress={handleSubmitButton} />
         }
