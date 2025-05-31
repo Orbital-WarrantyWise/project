@@ -73,7 +73,7 @@ export default function GetWarranties() {
               <View style={styleSheet.table_row}>
                 <Text style={styleSheet.table_cell}>{item.id}</Text>
                 <Text style={styleSheet.table_cell}>{item.product_name}</Text>
-                <Text style={styleSheet.table_cell}>{item.product_categories}</Text>
+                <Text style={styleSheet.table_cell}>{item.product_categories.join(',')}</Text>
                 <Text style={styleSheet.table_cell}>{item.purchase_date}</Text>
                 <Text style={styleSheet.table_cell}>{item.expiration_date}</Text>
               </View>
