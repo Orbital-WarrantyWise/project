@@ -1,18 +1,30 @@
-import { View, Text, TextInput, Button } from "react-native";
+import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from "react-native";
 import { useState } from 'react';
+import { DatePickerModal } from "react-native-paper-dates"; // Tried https://github.com/react-native-datetimepicker/datetimepicker and https://github.com/mmazzarolo/react-native-modal-datetime-picker, but both don't work on Web
+import { format } from 'date-fns';
+import FlashMessage, { showMessage } from 'react-native-flash-message';
 
 export default function AddWarranty() {
   const [productName, setProductName] = useState('');
   const [productCategories, setProductCategories] = useState('');
-  const [purchaseDate, setPurchaseDate] = useState('');
-  const [expirationDate, setExpirationDate] = useState('');
+  const [openPurchaseDatePicker, setOpenPurchaseDatePicker] = useState(false);
+  const [purchaseDate, setPurchaseDate] = useState(new Date());
+  const [openExpirationDatePicker, setOpenExpirationDatePicker] = useState(false);
+  const [expirationDate, setExpirationDate] = useState(new Date());
+  const [submitLoading, setSubmitLoading] = useState(false);
 
-  const handleButton = async () => {
+  const formatDate = (date: Date) => {
+    return format(date, 'yyyy-MM-dd'); // Ref: https://date-fns.org/docs/format
+  };
+
+  const handleSubmitButton = async () => {
+    if (submitLoading) return; // Just in case
+    setSubmitLoading(true);
     const data = {
       product_name: productName,
       product_categories: productCategories.split(','),
-      purchase_date: purchaseDate,
-      expiration_date: expirationDate,
+      purchase_date: formatDate(purchaseDate),
+      expiration_date: formatDate(expirationDate),
     };
     console.log('Form Data is', data);
     const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + "/warranty", {
@@ -22,7 +34,29 @@ export default function AddWarranty() {
     });
     const json = await res.json();
     console.log('Backend Response is', res.status, json);
+    if (json["success"]) {
+      showMessage({ type: 'success', message: 'Successfully Added Warranty!'});
+    } else {
+      showMessage({ type: 'danger', message: 'Failed to Add Warranty!'});
+    }
+    setSubmitLoading(false);
   };
+
+  const styleSheet = StyleSheet.create({
+    textLabel: {
+      marginBottom: 5,
+    },
+    textInput: {
+      marginBottom: 15,
+      borderWidth: 1,
+    },
+    datePickerButtonViewWrapper: {
+      marginBottom: 15,
+    },
+    submitButtonViewWrapper: {
+      marginTop: 15,
+    },
+  });
 
   return (
     <View
@@ -32,39 +66,73 @@ export default function AddWarranty() {
         alignItems: "center",
       }}
     >
-      <Text>Product Name:</Text>
-      <TextInput
+      <Text style={styleSheet.textLabel}>Product Name:</Text>
+      <TextInput style={styleSheet.textInput}
         value={productName}
         onChangeText={setProductName}
         placeholder="Laptop"
-        style={{ borderWidth: 1 }}
+        placeholderTextColor="#808080"
       />
 
-      <Text>Product Categories (Comma-Separated):</Text>
-      <TextInput
+      <Text style={styleSheet.textLabel}>Product Categories (Comma-Separated):</Text>
+      <TextInput style={styleSheet.textInput}
         value={productCategories}
         onChangeText={setProductCategories}
         placeholder="Electonics,Software"
-        style={{ borderWidth: 1 }}
+        placeholderTextColor="#808080"
       />
 
-      <Text>Purchase Date:</Text>
-      <TextInput
-        value={purchaseDate}
-        onChangeText={setPurchaseDate}
-        placeholder="YYYY-MM-DD"
-        style={{ borderWidth: 1 }}
+      <Text style={styleSheet.textLabel}>Purchase Date:</Text>
+      <View style={styleSheet.datePickerButtonViewWrapper}>
+        <Button title={formatDate(purchaseDate)} onPress={() => {
+          setOpenPurchaseDatePicker(true);
+        }}/>
+      </View>
+      <DatePickerModal
+          locale="en"
+          mode="single"
+          visible={openPurchaseDatePicker}
+          onDismiss={() => {
+            setOpenPurchaseDatePicker(false);
+          }}
+          date={purchaseDate}
+          onConfirm={(params: any) => {
+            console.log("PurchaseDatePicker", params)
+            setOpenPurchaseDatePicker(false);
+            setPurchaseDate(params.date);
+          }}
       />
 
-      <Text>Expiration Date:</Text>
-      <TextInput
-        value={expirationDate}
-        onChangeText={setExpirationDate}
-        placeholder="YYYY-MM-DD"
-        style={{ borderWidth: 1 }}
+      <Text style={styleSheet.textLabel}>Expiration Date:</Text>
+      <View style={styleSheet.datePickerButtonViewWrapper}>
+        <Button title={formatDate(expirationDate)} onPress={() => {
+          setOpenExpirationDatePicker(true);
+        }}/>
+      </View>
+      <DatePickerModal
+          locale="en"
+          mode="single"
+          visible={openExpirationDatePicker}
+          onDismiss={() => {
+            setOpenExpirationDatePicker(false);
+          }}
+          date={expirationDate}
+          onConfirm={(params: any) => {
+            console.log("ExpirationDatePicker", params)
+            setOpenExpirationDatePicker(false);
+            setExpirationDate(params.date);
+          }}
       />
 
-      <Button title="Add Warranty" onPress={handleButton} />
+      <View style={styleSheet.submitButtonViewWrapper}>
+        {
+          submitLoading ?
+          <ActivityIndicator size="small" /> :
+          <Button title="Add Warranty" onPress={handleSubmitButton} />
+        }
+      </View>
+
+      <FlashMessage position="top" />
     </View>
   );
 }

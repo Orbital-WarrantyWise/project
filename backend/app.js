@@ -16,9 +16,14 @@ app.post("/warranty", async (req, res) => {
   const { data, error } = await supabase.from("warranties").insert(req.body); // Supabase returns error not err lol
   console.log("Supabase Response", data, error);
   if (error) {
-    return res.status(400).json(error);
+    return res.status(400).json({
+      "success": false,
+      "error": error
+    });
   }
-  res.status(200);
+  res.status(200).json({
+    "success": true
+  })
 });
 
 app.get("/warranty", async (req, res) => {
@@ -26,15 +31,24 @@ app.get("/warranty", async (req, res) => {
   const { data, error } = await supabase.from("warranties").select(); // Supabase returns error not err lol
   console.log("Supabase Response", data, error);
   if (error) {
-    return res.status(400).json(error);
+    return res.status(400).json({
+      "success": false,
+      "error": error
+    });
   }
-  res.json(data);
+  res.status(200).json({
+    "success": true,
+    "data": data
+  })
 });
 
 
 
 app.get('/healthcheck', (req, res) => {
-  res.send(`Backend is up! Server time is ${new Date().toString()}`)
+  res.json({
+    "success": true,
+    "message": `Backend is up! Server time is ${new Date().toString()}`
+  })
 })
 
 app.listen(port, () => {
