@@ -34,28 +34,37 @@ export default function GetWarranties() {
   };
 
   const styleSheet = StyleSheet.create({
+    scrollableView: {
+      flex: 1, // Needed to ensure view is scrollable
+    },
     table_row: {
+      flex: 1, // Needed to draw table column lines correctly
       flexDirection: 'row', // Overflow <Text> blocks horizontally instead of vertically
       borderBottomWidth: 1 // Only draw bottom border to prevent overlap
     },
     table_cell: {
+      flex: 1, // Needed to draw table column lines correctly
+      borderRightWidth: 1, // Only draw right border to prevent overlap
       padding: 5,
-      borderRightWidth: 1 // Only draw right border to prevent overlap
+      textAlign: 'center'
+    },
+    bold_cell: {
+      fontWeight: 'bold'
     }
   });
 
   return (
-    <View>
+    <View style={styleSheet.scrollableView}>
       <Button title="Load" onPress={handleLoadButton} />
       <SafeAreaProvider>
-        <SafeAreaView>
+        <SafeAreaView style={styleSheet.scrollableView}>
           <FlatList
             data={warranties}
             ListHeaderComponent={() => (
               <View style={styleSheet.table_row}>
                 {
                   TABLE_HEADERS.map((col) => (
-                    <Text style={styleSheet.table_cell}>{col.label}</Text>
+                    <Text style={[styleSheet.table_cell, styleSheet.bold_cell]}>{col.label}</Text>
                   ))
                 }
               </View>
