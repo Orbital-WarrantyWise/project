@@ -2,8 +2,11 @@ import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from "re
 import { useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 import { storeSession } from '../helpers/storage';
+import { useNavigation } from '@react-navigation/native';
 
 export default function Login() {
+  const navigation = useNavigation<any>();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -28,11 +31,13 @@ export default function Login() {
       await storeSession("SUPABASE_ACCESS_TOKEN", session_details["access_token"]);
       //await storeSession("SUPABASE_USER_ID", session_details["user"]["id"]);
       showMessage({ type: 'success', message: 'Successful Login!'});
+      setSubmitLoading(false);
+      navigation.replace('index');
     } else {
       let error_details = json["error"];
       showMessage({ type: 'danger', message: `Failed to Login! [${error_details["code"]}: ${error_details["name"]}]`});
+      setSubmitLoading(false);
     }
-    setSubmitLoading(false);
   };
 
   const styleSheet = StyleSheet.create({

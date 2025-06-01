@@ -16,3 +16,11 @@ export async function getSession(key: string): Promise<string | null> { // Neces
     return await SecureStore.getItemAsync(key);
   }
 }
+
+export async function clearSession(key: string) { // Necessary since React Web doesn't support SecureStore :(
+  if (Platform.OS == "web") {
+    window.localStorage.removeItem(key);
+  } else {
+    return await SecureStore.deleteItemAsync(key);
+  }
+}
