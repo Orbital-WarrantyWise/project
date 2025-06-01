@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View, Image, Button } from "react-native";
 import { useNavigation } from '@react-navigation/native';
-import { getSession } from '../helpers/storage';
+import { getSession, clearSession } from '../helpers/storage';
 import { useEffect, useState } from "react";
 
 export default function Index() {
@@ -39,14 +39,22 @@ export default function Index() {
         ?
         <View>
           <View style={styleSheet.buttonViewWrapper}>
+            <Button title="Logout" onPress={() => {
+              clearSession('SUPABASE_ACCESS_TOKEN').then(() => {
+                setLoggedIn(false);
+              });
+            }}/>
+          </View>
+
+          <View style={styleSheet.buttonViewWrapper}>
             <Button title="New Warranty" onPress={() => {
-              navigation.navigate('add_warranty')
+              navigation.navigate('add_warranty');
             }}/>
           </View>
 
           <View style={styleSheet.buttonViewWrapper}>
             <Button title="List Warranties" onPress={() => {
-              navigation.navigate('get_warranties')
+              navigation.navigate('get_warranties');
             }}/>
           </View>
         </View>
@@ -54,13 +62,13 @@ export default function Index() {
         <View>
           <View style={styleSheet.buttonViewWrapper}>
             <Button title="Register" onPress={() => {
-              navigation.navigate('register')
+              navigation.navigate('register');
             }}/>
           </View>
 
           <View style={styleSheet.buttonViewWrapper}>
             <Button title="Login" onPress={() => {
-              navigation.navigate('login')
+              navigation.navigate('login');
             }}/>
           </View>
         </View>
