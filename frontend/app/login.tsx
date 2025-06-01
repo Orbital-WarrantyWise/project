@@ -3,7 +3,7 @@ import { useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 import { storeSession } from '../helpers/storage';
 
-export default function Register() {
+export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitLoading, setSubmitLoading] = useState(false);
