@@ -27,6 +27,22 @@ app.post("/auth/register", async (req, res) => {
   })
 });
 
+app.post("/auth/login", async (req, res) => {
+  console.log("Recieved Body", req.body);
+  const { data, error } = await supabase.auth.signInWithPassword(req.body); // Supabase returns error not err lol
+  console.log("Supabase Response", data, error);
+  if (error) {
+    return res.status(400).json({
+      "success": false,
+      "error": error
+    });
+  }
+  res.status(200).json({
+    "success": true,
+    "data": data
+  })
+});
+
 app.post("/warranty", async (req, res) => {
   console.log("Recieved Body", req.body);
   const { data, error } = await supabase.from("warranties").insert(req.body); // Supabase returns error not err lol
