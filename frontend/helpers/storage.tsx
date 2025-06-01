@@ -9,10 +9,10 @@ export async function storeSession(key: string, val: string) { // Necessary sinc
   }
 }
 
-export async function getSession(key: string, val: string) { // Necessary since React Web doesn't support SecureStore :(
+export async function getSession(key: string): Promise<string | null> { // Necessary since React Web doesn't support SecureStore :(
   if (Platform.OS == "web") {
-    window.localStorage.setItem(key, val);
+    return window.localStorage.getItem(key);
   } else {
-    await SecureStore.setItemAsync(key, val);
+    return await SecureStore.getItemAsync(key);
   }
 }
