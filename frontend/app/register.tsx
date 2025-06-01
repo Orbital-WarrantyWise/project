@@ -25,7 +25,8 @@ export default function Register() {
     if (json["success"]) {
       showMessage({ type: 'success', message: 'Successfully Registered Account!'});
     } else {
-      showMessage({ type: 'danger', message: 'Failed to Register Account!'});
+      let error_details = json["error"];
+      showMessage({ type: 'danger', message: `Failed to Register Account! [${error_details["code"]}: ${error_details["name"]}]`});
     }
     setSubmitLoading(false);
   };
@@ -57,14 +58,16 @@ export default function Register() {
         onChangeText={setEmail}
         placeholder="example@email.com"
         placeholderTextColor="#808080"
+        inputMode="email"
       />
 
       <Text style={styleSheet.textLabel}>Password:</Text>
       <TextInput style={styleSheet.textInput}
         value={password}
         onChangeText={setPassword}
-        placeholder="password123"
+        placeholder="•••••••••••••••"
         placeholderTextColor="#808080"
+        secureTextEntry={true}
       />
 
       <View style={styleSheet.submitButtonViewWrapper}>
