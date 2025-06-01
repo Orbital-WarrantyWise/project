@@ -61,9 +61,10 @@ app.post("/warranty", authRequired, async (req, res) => {
   })
 });
 
-app.get("/warranty", async (req, res) => {
+app.get("/warranty", authRequired, async (req, res) => {
   console.log("Recieved Body", req.body);
-  const { data, error } = await supabase.from("warranties").select(); // Supabase returns error not err lol
+  const user_id = req.middleware_data.user_id; // Get user_id obtained from middleware
+  const { data, error } = await supabase.from("warranties").select().eq("user_id", user_id); // Supabase returns error not err lol
   console.log("Supabase Response", data, error);
   if (error) {
     return res.status(400).json({
