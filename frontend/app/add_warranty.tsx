@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { DatePickerModal } from "react-native-paper-dates"; // Tried https://github.com/react-native-datetimepicker/datetimepicker and https://github.com/mmazzarolo/react-native-modal-datetime-picker, but both don't work on Web
 import { format } from 'date-fns';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
+import { getSession } from '../helpers/storage';
 
 export default function AddWarranty() {
   const [productName, setProductName] = useState('');
@@ -19,6 +20,12 @@ export default function AddWarranty() {
 
   const handleSubmitButton = async () => {
     if (submitLoading) return; // Just in case
+    const access_token = await getSession('SUPABASE_ACCESS_TOKEN');
+    if (access_token == null) {
+      showMessage({ type: 'danger', message: 'Missing Access Token! Login First!'});
+      return;
+    }
+
     setSubmitLoading(true);
     const data = {
       product_name: productName,
@@ -29,7 +36,10 @@ export default function AddWarranty() {
     console.log('Form Data is', data);
     const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + "/warranty", {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'SUPABASE_ACCESS_TOKEN': access_token
+      },
       body: JSON.stringify(data)
     });
     const json = await res.json();
