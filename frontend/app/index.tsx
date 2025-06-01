@@ -1,8 +1,16 @@
 import { StyleSheet, Text, View, Image, Button } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import { getSession } from '../helpers/storage';
+import { useEffect, useState } from "react";
 
 export default function Index() {
+  const [loggedIn, setLoggedIn] = useState<boolean>(false);
+  
+  useEffect(() => {
+    getSession('SUPABASE_ACCESS_TOKEN').then(val => {
+      setLoggedIn(val != null);
+    })
+  }, [])
 
   const navigation = useNavigation<any>();
   const styleSheet = StyleSheet.create({
@@ -26,29 +34,37 @@ export default function Index() {
       <Text style={styleSheet.logoLabel}>WarrantyWise Main Menu</Text>
       <Image source={require('../assets/images/warrantywise-logo.png')} />
 
-      <View style={styleSheet.buttonViewWrapper}>
-        <Button title="Register" onPress={() => {
-          navigation.navigate('register')
-        }}/>
-      </View>
+      {
+        loggedIn
+        ?
+        <View>
+          <View style={styleSheet.buttonViewWrapper}>
+            <Button title="New Warranty" onPress={() => {
+              navigation.navigate('add_warranty')
+            }}/>
+          </View>
 
-      <View style={styleSheet.buttonViewWrapper}>
-        <Button title="Login" onPress={() => {
-          navigation.navigate('login')
-        }}/>
-      </View>
+          <View style={styleSheet.buttonViewWrapper}>
+            <Button title="List Warranties" onPress={() => {
+              navigation.navigate('get_warranties')
+            }}/>
+          </View>
+        </View>
+        :
+        <View>
+          <View style={styleSheet.buttonViewWrapper}>
+            <Button title="Register" onPress={() => {
+              navigation.navigate('register')
+            }}/>
+          </View>
 
-      <View style={styleSheet.buttonViewWrapper}>
-        <Button title="New Warranty" onPress={() => {
-          navigation.navigate('add_warranty')
-        }}/>
-      </View>
-
-      <View style={styleSheet.buttonViewWrapper}>
-        <Button title="List Warranties" onPress={() => {
-          navigation.navigate('get_warranties')
-        }}/>
-      </View>
+          <View style={styleSheet.buttonViewWrapper}>
+            <Button title="Login" onPress={() => {
+              navigation.navigate('login')
+            }}/>
+          </View>
+        </View>
+      }
     </View>
   );
 }
