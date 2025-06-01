@@ -9,5 +9,5 @@ npm install
 2. Run backend
 
 ```bash
-node app.js
+node --env-file=.env app.js
 ```
