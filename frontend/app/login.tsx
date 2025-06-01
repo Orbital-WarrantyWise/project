@@ -1,15 +1,7 @@
-import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator, Platform } from "react-native";
+import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from "react-native";
 import { useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
-import * as SecureStore from 'expo-secure-store';
-
-async function storeSession(key: string, val: string) { // Necessary since React Web doesn't support SecureStore :(
-  if (Platform.OS == "web") {
-    window.localStorage.setItem(key, val);
-  } else {
-    await SecureStore.setItemAsync(key, val);
-  }
-}
+import { storeSession } from '../helpers/storage';
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -34,7 +26,7 @@ export default function Register() {
     if (json["success"]) {
       let session_details = json["data"]["session"];
       await storeSession("SUPABASE_ACCESS_TOKEN", session_details["access_token"]);
-      await storeSession("SUPABASE_USER_ID", session_details["user"]["id"]);
+      //await storeSession("SUPABASE_USER_ID", session_details["user"]["id"]);
       showMessage({ type: 'success', message: 'Successful Login!'});
     } else {
       let error_details = json["error"];
