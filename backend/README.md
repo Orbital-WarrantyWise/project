@@ -2,13 +2,15 @@
 
 ## Local
 
-1. Install dependencies
+1. Create an `.env` file containing the various URLs and API Keys (please refer to `.env.example`)
+
+2. Install dependencies
 
 ```bash
 npm install
 ```
 
-2. Run backend
+3. Run backend
 
 ```bash
 node --env-file=.env app.js
