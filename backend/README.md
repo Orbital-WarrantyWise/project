@@ -1,13 +1,36 @@
 # Backend
 
-1. Install dependencies
+## Local
+
+1. Create an `.env` file containing the various URLs and API Keys (please refer to `.env.example`)
+
+2. Install dependencies
 
 ```bash
 npm install
 ```
 
-2. Run backend
+3. Run backend
 
 ```bash
-node app.js
+node --env-file=.env app.js
 ```
+
+## Vercel
+
+1. Install Vercel
+```bash
+npm i -g vercel
+```
+
+2. Login to Vercel
+```bash
+vercel login
+```
+
+3. Deploy to Production on Vercel (feel free to use all default settings)
+```bash
+vercel --prod
+```
+
+4. Go to the "Settings" tab of your Backend Project on Vercel, click "Environment Variables" in the sidebar, and upload the `.env` file (remembering to change the URLs accordingly)
