@@ -1,10 +1,14 @@
-const { authRequired } = require("./middleware.js");
+import express from 'express'
+import cors from 'cors'
+import supabase from './client';
+import { authRequired } from './middleware';
 
-const { createClient } = require('@supabase/supabase-js');
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+declare module "express-serve-static-core" {
+  interface Request {
+    middleware_data: { user_id: string };
+  }
+}
 
-const express = require('express')
-const cors = require('cors');
 const app = express()
 const port = 8000
 
@@ -16,15 +20,16 @@ app.post("/auth/register", async (req, res) => {
   const { data, error } = await supabase.auth.signUp(req.body); // Supabase returns error not err lol
   console.log("Supabase Response", data, error);
   if (error) {
-    return res.status(400).json({
+    res.status(400).json({
       "success": false,
       "error": error
     });
+  } else {
+    res.status(200).json({
+      "success": true,
+      "data": data
+    })
   }
-  res.status(200).json({
-    "success": true,
-    "data": data
-  })
 });
 
 app.post("/auth/login", async (req, res) => {
@@ -32,31 +37,33 @@ app.post("/auth/login", async (req, res) => {
   const { data, error } = await supabase.auth.signInWithPassword(req.body); // Supabase returns error not err lol
   console.log("Supabase Response", data, error);
   if (error) {
-    return res.status(401).json({
+    res.status(401).json({
       "success": false,
       "error": error
     });
+  } else {
+    res.status(200).json({
+      "success": true,
+      "data": data
+    })
   }
-  res.status(200).json({
-    "success": true,
-    "data": data
-  })
 });
 
 app.post("/warranty", authRequired, async (req, res) => {
   console.log("Recieved Body", req.body);
-  req.body.user_id = req.middleware_data.user_id; // Inject user_id obtained from middleware
+  req.body.user_id = req.middleware_data?.user_id; // Inject user_id obtained from middleware
   const { data, error } = await supabase.from("warranties").insert(req.body); // Supabase returns error not err lol
   console.log("Supabase Response", data, error);
   if (error) {
-    return res.status(400).json({
+    res.status(400).json({
       "success": false,
       "error": error
     });
+  } else {
+    res.status(200).json({
+      "success": true
+    })
   }
-  res.status(200).json({
-    "success": true
-  })
 });
 
 app.get("/warranty", authRequired, async (req, res) => {
@@ -65,15 +72,16 @@ app.get("/warranty", authRequired, async (req, res) => {
   const { data, error } = await supabase.from("warranties").select().eq("user_id", user_id); // Supabase returns error not err lol
   console.log("Supabase Response", data, error);
   if (error) {
-    return res.status(400).json({
+    res.status(400).json({
       "success": false,
       "error": error
     });
+  } else {
+    res.status(200).json({
+      "success": true,
+      "data": data
+    })
   }
-  res.status(200).json({
-    "success": true,
-    "data": data
-  })
 });
 
 
