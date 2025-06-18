@@ -1,4 +1,4 @@
-import type {Request, Response, NextFunction } from 'express'
+import type { Request, Response, NextFunction } from 'express'
 import supabase from './client';
 
 export async function authRequired(req: Request, res: Response, next: NextFunction) {

@@ -51,7 +51,7 @@ app.post("/auth/login", async (req, res) => {
 
 app.post("/warranty", authRequired, async (req, res) => {
   console.log("Recieved Body", req.body);
-  req.body.user_id = req.middleware_data?.user_id; // Inject user_id obtained from middleware
+  req.body.user_id = req.middleware_data.user_id; // Inject user_id obtained from middleware
   const { data, error } = await supabase.from("warranties").insert(req.body); // Supabase returns error not err lol
   console.log("Supabase Response", data, error);
   if (error) {
