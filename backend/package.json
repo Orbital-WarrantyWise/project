@@ -4,7 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "node -r ts-node/register --env-file=.env app.ts"
+    "start": "node -r ts-node/register --env-file=.env app.ts",
+    "format": "prettier . --write"
   },
   "keywords": [],
   "author": "",
