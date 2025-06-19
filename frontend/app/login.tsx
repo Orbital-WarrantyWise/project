@@ -1,4 +1,11 @@
-import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  Button,
+  ActivityIndicator,
+} from 'react-native';
 import { useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 import { storeSession } from '../helpers/storage';
@@ -16,26 +23,35 @@ export default function Login() {
     setSubmitLoading(true);
     const data = {
       email: email,
-      password: password
+      password: password,
     };
     console.log('Form Data is', data);
-    const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + "/auth/login", {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
+    const res = await fetch(
+      process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/auth/login',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      },
+    );
     const json = await res.json();
     console.log('Backend Response is', res.status, json);
-    if (json["success"]) {
-      let session_details = json["data"]["session"];
-      await storeSession("SUPABASE_ACCESS_TOKEN", session_details["access_token"]);
+    if (json['success']) {
+      let session_details = json['data']['session'];
+      await storeSession(
+        'SUPABASE_ACCESS_TOKEN',
+        session_details['access_token'],
+      );
       //await storeSession("SUPABASE_USER_ID", session_details["user"]["id"]);
-      showMessage({ type: 'success', message: 'Successful Login!'});
+      showMessage({ type: 'success', message: 'Successful Login!' });
       setSubmitLoading(false);
       navigation.replace('index');
     } else {
-      let error_details = json["error"];
-      showMessage({ type: 'danger', message: `Failed to Login! [${error_details["code"]}: ${error_details["name"]}]`});
+      let error_details = json['error'];
+      showMessage({
+        type: 'danger',
+        message: `Failed to Login! [${error_details['code']}: ${error_details['name']}]`,
+      });
       setSubmitLoading(false);
     }
   };
@@ -50,19 +66,20 @@ export default function Login() {
     },
     submitButtonViewWrapper: {
       marginTop: 15,
-    }
+    },
   });
 
   return (
     <View
       style={{
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
+        justifyContent: 'center',
+        alignItems: 'center',
       }}
     >
       <Text style={styleSheet.textLabel}>Email:</Text>
-      <TextInput style={styleSheet.textInput}
+      <TextInput
+        style={styleSheet.textInput}
         value={email}
         onChangeText={setEmail}
         placeholder="example@email.com"
@@ -71,7 +88,8 @@ export default function Login() {
       />
 
       <Text style={styleSheet.textLabel}>Password:</Text>
-      <TextInput style={styleSheet.textInput}
+      <TextInput
+        style={styleSheet.textInput}
         value={password}
         onChangeText={setPassword}
         placeholder="•••••••••••••••"
@@ -80,11 +98,11 @@ export default function Login() {
       />
 
       <View style={styleSheet.submitButtonViewWrapper}>
-        {
-          submitLoading ?
-          <ActivityIndicator size="small" /> :
+        {submitLoading ? (
+          <ActivityIndicator size="small" />
+        ) : (
           <Button title="Login" onPress={handleSubmitButton} />
-        }
+        )}
       </View>
 
       <FlashMessage position="top" />

@@ -1,6 +1,13 @@
-import { StyleSheet, View, Button, FlatList, Text, ActivityIndicator } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Button,
+  FlatList,
+  Text,
+  ActivityIndicator,
+} from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import { useState } from "react";
+import { useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 import { getSession } from '../helpers/storage';
 
@@ -29,22 +36,28 @@ export default function GetWarranties() {
     if (submitLoading) return; // Just in case
     const access_token = await getSession('SUPABASE_ACCESS_TOKEN');
     if (access_token == null) {
-      showMessage({ type: 'danger', message: 'Missing Access Token! Login First!'});
+      showMessage({
+        type: 'danger',
+        message: 'Missing Access Token! Login First!',
+      });
       return;
     }
 
     setSubmitLoading(true);
-    console.log('Sending Request to Backend...')
-    const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + "/warranty", {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'SUPABASE_ACCESS_TOKEN': access_token
-      }
-    });
+    console.log('Sending Request to Backend...');
+    const res = await fetch(
+      process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/warranty',
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          SUPABASE_ACCESS_TOKEN: access_token,
+        },
+      },
+    );
     const json = await res.json();
     console.log('Backend Response is', res.status, json);
-    setWarranties(json["data"]);
+    setWarranties(json['data']);
     setSubmitLoading(false);
   };
 
@@ -55,49 +68,53 @@ export default function GetWarranties() {
     table_row: {
       flex: 1, // Needed to draw table column lines correctly
       flexDirection: 'row', // Overflow <Text> blocks horizontally instead of vertically
-      borderBottomWidth: 1 // Only draw bottom border to prevent overlap
+      borderBottomWidth: 1, // Only draw bottom border to prevent overlap
     },
     table_cell: {
       flex: 1, // Needed to draw table column lines correctly
       borderRightWidth: 1, // Only draw right border to prevent overlap
       padding: 5,
-      textAlign: 'center'
+      textAlign: 'center',
     },
     bold_cell: {
-      fontWeight: 'bold'
-    }
+      fontWeight: 'bold',
+    },
   });
 
   return (
     <View style={styleSheet.scrollableView}>
       <View>
-        {
-          submitLoading ?
-          <ActivityIndicator size="small" /> :
+        {submitLoading ? (
+          <ActivityIndicator size="small" />
+        ) : (
           <Button title="Load Warranties" onPress={handleLoadButton} />
-        }
+        )}
       </View>
-      
+
       <SafeAreaProvider>
         <SafeAreaView style={styleSheet.scrollableView}>
           <FlatList
             data={warranties}
             ListHeaderComponent={() => (
               <View style={styleSheet.table_row}>
-                {
-                  TABLE_HEADERS.map((col) => (
-                    <Text style={[styleSheet.table_cell, styleSheet.bold_cell]}>{col.label}</Text>
-                  ))
-                }
+                {TABLE_HEADERS.map(col => (
+                  <Text style={[styleSheet.table_cell, styleSheet.bold_cell]}>
+                    {col.label}
+                  </Text>
+                ))}
               </View>
             )}
-            renderItem={({item}) => (
+            renderItem={({ item }) => (
               <View style={styleSheet.table_row}>
                 <Text style={styleSheet.table_cell}>{item.id}</Text>
                 <Text style={styleSheet.table_cell}>{item.product_name}</Text>
-                <Text style={styleSheet.table_cell}>{item.product_categories.join(',')}</Text>
+                <Text style={styleSheet.table_cell}>
+                  {item.product_categories.join(',')}
+                </Text>
                 <Text style={styleSheet.table_cell}>{item.purchase_date}</Text>
-                <Text style={styleSheet.table_cell}>{item.expiration_date}</Text>
+                <Text style={styleSheet.table_cell}>
+                  {item.expiration_date}
+                </Text>
               </View>
             )}
             keyExtractor={item => item.id.toString()}

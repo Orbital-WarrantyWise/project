@@ -19,16 +19,19 @@ npx expo start
 ## Vercel
 
 1. Install Vercel
+
 ```bash
 npm i -g vercel
 ```
 
 2. Login to Vercel
+
 ```bash
 vercel login
 ```
 
 3. Deploy to Production on Vercel (feel free to use all default settings)
+
 ```bash
 vercel --prod
 ```
