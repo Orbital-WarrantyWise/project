@@ -1,7 +1,8 @@
 import express from 'express';
 import cors from 'cors';
-import supabase from './client';
 import { authRequired } from './middleware';
+import { router as AuthRouter } from './routes/auth';
+import { router as WarrantyRouter } from './routes';
 
 declare module 'express-serve-static-core' {
   interface Request {
@@ -15,74 +16,8 @@ const port = 8000;
 app.use(cors({ origin: process.env.FRONTEND_BASE_URL })); // Prevent CORS errors
 app.use(express.json()); // Ensure req recieved is in json
 
-app.post('/auth/register', async (req, res) => {
-  console.log('Recieved Body', req.body);
-  const { data, error } = await supabase.auth.signUp(req.body); // Supabase returns error not err lol
-  console.log('Supabase Response', data, error);
-  if (error) {
-    res.status(400).json({
-      success: false,
-      error: error,
-    });
-  } else {
-    res.status(200).json({
-      success: true,
-      data: data,
-    });
-  }
-});
-
-app.post('/auth/login', async (req, res) => {
-  console.log('Recieved Body', req.body);
-  const { data, error } = await supabase.auth.signInWithPassword(req.body); // Supabase returns error not err lol
-  console.log('Supabase Response', data, error);
-  if (error) {
-    res.status(401).json({
-      success: false,
-      error: error,
-    });
-  } else {
-    res.status(200).json({
-      success: true,
-      data: data,
-    });
-  }
-});
-
-app.post('/warranty', authRequired, async (req, res) => {
-  console.log('Recieved Body', req.body);
-  req.body.user_id = req.middleware_data.user_id; // Inject user_id obtained from middleware
-  const { data, error } = await supabase.from('warranties').insert(req.body); // Supabase returns error not err lol
-  console.log('Supabase Response', data, error);
-  if (error) {
-    res.status(400).json({
-      success: false,
-      error: error,
-    });
-  } else {
-    res.status(200).json({
-      success: true,
-    });
-  }
-});
-
-app.get('/warranty', authRequired, async (req, res) => {
-  console.log('Recieved Body', req.body);
-  const user_id = req.middleware_data.user_id; // Get user_id obtained from middleware
-  const { data, error } = await supabase.from('warranties').select().eq('user_id', user_id); // Supabase returns error not err lol
-  console.log('Supabase Response', data, error);
-  if (error) {
-    res.status(400).json({
-      success: false,
-      error: error,
-    });
-  } else {
-    res.status(200).json({
-      success: true,
-      data: data,
-    });
-  }
-});
+app.use('/auth', AuthRouter);
+app.use('/warranty', authRequired, WarrantyRouter);
 
 app.get('/healthcheck', (req, res) => {
   res.json({
