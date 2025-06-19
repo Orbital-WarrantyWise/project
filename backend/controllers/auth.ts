@@ -3,7 +3,7 @@ import supabase from '../client';
 
 const AuthController = {
   login: async (req: Request, res: Response) => {
-    console.log('Recieved Body', req.body);
+    console.log('Received Body', req.body);
     const { data, error } = await supabase.auth.signInWithPassword(req.body);
     console.log('Supabase Response', data, error);
     if (error) {
@@ -20,7 +20,7 @@ const AuthController = {
   },
 
   register: async (req: Request, res: Response) => {
-    console.log('Recieved Body', req.body);
+    console.log('Received Body', req.body);
     const { data, error } = await supabase.auth.signUp(req.body);
     console.log('Supabase Response', data, error);
     if (error) {
