@@ -1,6 +1,6 @@
-import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from "react-native";
+import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
-import { DatePickerModal } from "react-native-paper-dates"; // Tried https://github.com/react-native-datetimepicker/datetimepicker and https://github.com/mmazzarolo/react-native-modal-datetime-picker, but both don't work on Web
+import { DatePickerModal } from 'react-native-paper-dates'; // Tried https://github.com/react-native-datetimepicker/datetimepicker and https://github.com/mmazzarolo/react-native-modal-datetime-picker, but both don't work on Web
 import { format } from 'date-fns';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 import { getSession } from '../helpers/storage';
@@ -22,7 +22,10 @@ export default function AddWarranty() {
     if (submitLoading) return; // Just in case
     const access_token = await getSession('SUPABASE_ACCESS_TOKEN');
     if (access_token == null) {
-      showMessage({ type: 'danger', message: 'Missing Access Token! Login First!'});
+      showMessage({
+        type: 'danger',
+        message: 'Missing Access Token! Login First!',
+      });
       return;
     }
 
@@ -34,20 +37,20 @@ export default function AddWarranty() {
       expiration_date: formatDate(expirationDate),
     };
     console.log('Form Data is', data);
-    const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + "/warranty", {
+    const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/warranty', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'SUPABASE_ACCESS_TOKEN': access_token
+        SUPABASE_ACCESS_TOKEN: access_token,
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     });
     const json = await res.json();
     console.log('Backend Response is', res.status, json);
-    if (json["success"]) {
-      showMessage({ type: 'success', message: 'Successfully Added Warranty!'});
+    if (json['success']) {
+      showMessage({ type: 'success', message: 'Successfully Added Warranty!' });
     } else {
-      showMessage({ type: 'danger', message: 'Failed to Add Warranty!'});
+      showMessage({ type: 'danger', message: 'Failed to Add Warranty!' });
     }
     setSubmitLoading(false);
   };
@@ -72,12 +75,13 @@ export default function AddWarranty() {
     <View
       style={{
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
+        justifyContent: 'center',
+        alignItems: 'center',
       }}
     >
       <Text style={styleSheet.textLabel}>Product Name:</Text>
-      <TextInput style={styleSheet.textInput}
+      <TextInput
+        style={styleSheet.textInput}
         value={productName}
         onChangeText={setProductName}
         placeholder="Laptop"
@@ -85,7 +89,8 @@ export default function AddWarranty() {
       />
 
       <Text style={styleSheet.textLabel}>Product Categories (Comma-Separated):</Text>
-      <TextInput style={styleSheet.textInput}
+      <TextInput
+        style={styleSheet.textInput}
         value={productCategories}
         onChangeText={setProductCategories}
         placeholder="Electonics,Software"
@@ -94,52 +99,58 @@ export default function AddWarranty() {
 
       <Text style={styleSheet.textLabel}>Purchase Date:</Text>
       <View style={styleSheet.datePickerButtonViewWrapper}>
-        <Button title={formatDate(purchaseDate)} onPress={() => {
-          setOpenPurchaseDatePicker(true);
-        }}/>
+        <Button
+          title={formatDate(purchaseDate)}
+          onPress={() => {
+            setOpenPurchaseDatePicker(true);
+          }}
+        />
       </View>
       <DatePickerModal
-          locale="en"
-          mode="single"
-          visible={openPurchaseDatePicker}
-          onDismiss={() => {
-            setOpenPurchaseDatePicker(false);
-          }}
-          date={purchaseDate}
-          onConfirm={(params: any) => {
-            console.log("PurchaseDatePicker", params)
-            setOpenPurchaseDatePicker(false);
-            setPurchaseDate(params.date);
-          }}
+        locale="en"
+        mode="single"
+        visible={openPurchaseDatePicker}
+        onDismiss={() => {
+          setOpenPurchaseDatePicker(false);
+        }}
+        date={purchaseDate}
+        onConfirm={(params: any) => {
+          console.log('PurchaseDatePicker', params);
+          setOpenPurchaseDatePicker(false);
+          setPurchaseDate(params.date);
+        }}
       />
 
       <Text style={styleSheet.textLabel}>Expiration Date:</Text>
       <View style={styleSheet.datePickerButtonViewWrapper}>
-        <Button title={formatDate(expirationDate)} onPress={() => {
-          setOpenExpirationDatePicker(true);
-        }}/>
+        <Button
+          title={formatDate(expirationDate)}
+          onPress={() => {
+            setOpenExpirationDatePicker(true);
+          }}
+        />
       </View>
       <DatePickerModal
-          locale="en"
-          mode="single"
-          visible={openExpirationDatePicker}
-          onDismiss={() => {
-            setOpenExpirationDatePicker(false);
-          }}
-          date={expirationDate}
-          onConfirm={(params: any) => {
-            console.log("ExpirationDatePicker", params)
-            setOpenExpirationDatePicker(false);
-            setExpirationDate(params.date);
-          }}
+        locale="en"
+        mode="single"
+        visible={openExpirationDatePicker}
+        onDismiss={() => {
+          setOpenExpirationDatePicker(false);
+        }}
+        date={expirationDate}
+        onConfirm={(params: any) => {
+          console.log('ExpirationDatePicker', params);
+          setOpenExpirationDatePicker(false);
+          setExpirationDate(params.date);
+        }}
       />
 
       <View style={styleSheet.submitButtonViewWrapper}>
-        {
-          submitLoading ?
-          <ActivityIndicator size="small" /> :
+        {submitLoading ? (
+          <ActivityIndicator size="small" />
+        ) : (
           <Button title="Add Warranty" onPress={handleSubmitButton} />
-        }
+        )}
       </View>
 
       <FlashMessage position="top" />

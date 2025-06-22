@@ -1,98 +1,96 @@
-import express from 'express'
-import cors from 'cors'
+import express from 'express';
+import cors from 'cors';
 import supabase from './client';
 import { authRequired } from './middleware';
 
-declare module "express-serve-static-core" {
+declare module 'express-serve-static-core' {
   interface Request {
     middleware_data: { user_id: string };
   }
 }
 
-const app = express()
-const port = 8000
+const app = express();
+const port = 8000;
 
 app.use(cors({ origin: process.env.FRONTEND_BASE_URL })); // Prevent CORS errors
 app.use(express.json()); // Ensure req recieved is in json
 
-app.post("/auth/register", async (req, res) => {
-  console.log("Recieved Body", req.body);
+app.post('/auth/register', async (req, res) => {
+  console.log('Recieved Body', req.body);
   const { data, error } = await supabase.auth.signUp(req.body); // Supabase returns error not err lol
-  console.log("Supabase Response", data, error);
+  console.log('Supabase Response', data, error);
   if (error) {
     res.status(400).json({
-      "success": false,
-      "error": error
+      success: false,
+      error: error,
     });
   } else {
     res.status(200).json({
-      "success": true,
-      "data": data
-    })
+      success: true,
+      data: data,
+    });
   }
 });
 
-app.post("/auth/login", async (req, res) => {
-  console.log("Recieved Body", req.body);
+app.post('/auth/login', async (req, res) => {
+  console.log('Recieved Body', req.body);
   const { data, error } = await supabase.auth.signInWithPassword(req.body); // Supabase returns error not err lol
-  console.log("Supabase Response", data, error);
+  console.log('Supabase Response', data, error);
   if (error) {
     res.status(401).json({
-      "success": false,
-      "error": error
+      success: false,
+      error: error,
     });
   } else {
     res.status(200).json({
-      "success": true,
-      "data": data
-    })
+      success: true,
+      data: data,
+    });
   }
 });
 
-app.post("/warranty", authRequired, async (req, res) => {
-  console.log("Recieved Body", req.body);
+app.post('/warranty', authRequired, async (req, res) => {
+  console.log('Recieved Body', req.body);
   req.body.user_id = req.middleware_data.user_id; // Inject user_id obtained from middleware
-  const { data, error } = await supabase.from("warranties").insert(req.body); // Supabase returns error not err lol
-  console.log("Supabase Response", data, error);
+  const { data, error } = await supabase.from('warranties').insert(req.body); // Supabase returns error not err lol
+  console.log('Supabase Response', data, error);
   if (error) {
     res.status(400).json({
-      "success": false,
-      "error": error
+      success: false,
+      error: error,
     });
   } else {
     res.status(200).json({
-      "success": true
-    })
+      success: true,
+    });
   }
 });
 
-app.get("/warranty", authRequired, async (req, res) => {
-  console.log("Recieved Body", req.body);
+app.get('/warranty', authRequired, async (req, res) => {
+  console.log('Recieved Body', req.body);
   const user_id = req.middleware_data.user_id; // Get user_id obtained from middleware
-  const { data, error } = await supabase.from("warranties").select().eq("user_id", user_id); // Supabase returns error not err lol
-  console.log("Supabase Response", data, error);
+  const { data, error } = await supabase.from('warranties').select().eq('user_id', user_id); // Supabase returns error not err lol
+  console.log('Supabase Response', data, error);
   if (error) {
     res.status(400).json({
-      "success": false,
-      "error": error
+      success: false,
+      error: error,
     });
   } else {
     res.status(200).json({
-      "success": true,
-      "data": data
-    })
+      success: true,
+      data: data,
+    });
   }
 });
-
-
 
 app.get('/healthcheck', (req, res) => {
   res.json({
-    "success": true,
-    "message": `Backend is up! Server time is ${new Date().toString()}`
-  })
-})
+    success: true,
+    message: `Backend is up! Server time is ${new Date().toString()}`,
+  });
+});
 
 app.listen(port, () => {
-  console.log(`Backend listening on port ${port}`)
-})
+  console.log(`Backend listening on port ${port}`);
+});

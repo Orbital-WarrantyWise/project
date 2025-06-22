@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from "react-native";
+import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 import { useNavigation } from '@react-navigation/native';
@@ -15,23 +15,29 @@ export default function Register() {
     setSubmitLoading(true);
     const data = {
       email: email,
-      password: password
+      password: password,
     };
     console.log('Form Data is', data);
-    const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + "/auth/register", {
+    const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     });
     const json = await res.json();
     console.log('Backend Response is', res.status, json);
-    if (json["success"]) {
-      showMessage({ type: 'success', message: 'Successfully Registered Account!'});
+    if (json['success']) {
+      showMessage({
+        type: 'success',
+        message: 'Successfully Registered Account!',
+      });
       navigation.replace('login');
       setSubmitLoading(false);
     } else {
-      let error_details = json["error"];
-      showMessage({ type: 'danger', message: `Failed to Register Account! [${error_details["code"]}: ${error_details["name"]}]`});
+      let error_details = json['error'];
+      showMessage({
+        type: 'danger',
+        message: `Failed to Register Account! [${error_details['code']}: ${error_details['name']}]`,
+      });
       setSubmitLoading(false);
     }
   };
@@ -46,19 +52,20 @@ export default function Register() {
     },
     submitButtonViewWrapper: {
       marginTop: 15,
-    }
+    },
   });
 
   return (
     <View
       style={{
         flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
+        justifyContent: 'center',
+        alignItems: 'center',
       }}
     >
       <Text style={styleSheet.textLabel}>Email:</Text>
-      <TextInput style={styleSheet.textInput}
+      <TextInput
+        style={styleSheet.textInput}
         value={email}
         onChangeText={setEmail}
         placeholder="example@email.com"
@@ -67,7 +74,8 @@ export default function Register() {
       />
 
       <Text style={styleSheet.textLabel}>Password:</Text>
-      <TextInput style={styleSheet.textInput}
+      <TextInput
+        style={styleSheet.textInput}
         value={password}
         onChangeText={setPassword}
         placeholder="•••••••••••••••"
@@ -76,11 +84,7 @@ export default function Register() {
       />
 
       <View style={styleSheet.submitButtonViewWrapper}>
-        {
-          submitLoading ?
-          <ActivityIndicator size="small" /> :
-          <Button title="Register" onPress={handleSubmitButton} />
-        }
+        {submitLoading ? <ActivityIndicator size="small" /> : <Button title="Register" onPress={handleSubmitButton} />}
       </View>
 
       <FlashMessage position="top" />
