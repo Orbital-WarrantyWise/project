@@ -1,11 +1,4 @@
-import {
-  StyleSheet,
-  View,
-  Text,
-  TextInput,
-  Button,
-  ActivityIndicator,
-} from 'react-native';
+import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { DatePickerModal } from 'react-native-paper-dates'; // Tried https://github.com/react-native-datetimepicker/datetimepicker and https://github.com/mmazzarolo/react-native-modal-datetime-picker, but both don't work on Web
 import { format } from 'date-fns';
@@ -17,8 +10,7 @@ export default function AddWarranty() {
   const [productCategories, setProductCategories] = useState('');
   const [openPurchaseDatePicker, setOpenPurchaseDatePicker] = useState(false);
   const [purchaseDate, setPurchaseDate] = useState(new Date());
-  const [openExpirationDatePicker, setOpenExpirationDatePicker] =
-    useState(false);
+  const [openExpirationDatePicker, setOpenExpirationDatePicker] = useState(false);
   const [expirationDate, setExpirationDate] = useState(new Date());
   const [submitLoading, setSubmitLoading] = useState(false);
 
@@ -45,17 +37,14 @@ export default function AddWarranty() {
       expiration_date: formatDate(expirationDate),
     };
     console.log('Form Data is', data);
-    const res = await fetch(
-      process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/warranty',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          SUPABASE_ACCESS_TOKEN: access_token,
-        },
-        body: JSON.stringify(data),
+    const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/warranty', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        SUPABASE_ACCESS_TOKEN: access_token,
       },
-    );
+      body: JSON.stringify(data),
+    });
     const json = await res.json();
     console.log('Backend Response is', res.status, json);
     if (json['success']) {
@@ -99,9 +88,7 @@ export default function AddWarranty() {
         placeholderTextColor="#808080"
       />
 
-      <Text style={styleSheet.textLabel}>
-        Product Categories (Comma-Separated):
-      </Text>
+      <Text style={styleSheet.textLabel}>Product Categories (Comma-Separated):</Text>
       <TextInput
         style={styleSheet.textInput}
         value={productCategories}

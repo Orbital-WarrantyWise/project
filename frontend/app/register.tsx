@@ -1,11 +1,4 @@
-import {
-  StyleSheet,
-  View,
-  Text,
-  TextInput,
-  Button,
-  ActivityIndicator,
-} from 'react-native';
+import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 import { useNavigation } from '@react-navigation/native';
@@ -25,14 +18,11 @@ export default function Register() {
       password: password,
     };
     console.log('Form Data is', data);
-    const res = await fetch(
-      process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/auth/register',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      },
-    );
+    const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
     const json = await res.json();
     console.log('Backend Response is', res.status, json);
     if (json['success']) {
@@ -94,11 +84,7 @@ export default function Register() {
       />
 
       <View style={styleSheet.submitButtonViewWrapper}>
-        {submitLoading ? (
-          <ActivityIndicator size="small" />
-        ) : (
-          <Button title="Register" onPress={handleSubmitButton} />
-        )}
+        {submitLoading ? <ActivityIndicator size="small" /> : <Button title="Register" onPress={handleSubmitButton} />}
       </View>
 
       <FlashMessage position="top" />

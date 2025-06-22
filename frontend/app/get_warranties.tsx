@@ -1,11 +1,4 @@
-import {
-  StyleSheet,
-  View,
-  Button,
-  FlatList,
-  Text,
-  ActivityIndicator,
-} from 'react-native';
+import { StyleSheet, View, Button, FlatList, Text, ActivityIndicator } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
@@ -45,16 +38,13 @@ export default function GetWarranties() {
 
     setSubmitLoading(true);
     console.log('Sending Request to Backend...');
-    const res = await fetch(
-      process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/warranty',
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          SUPABASE_ACCESS_TOKEN: access_token,
-        },
+    const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/warranty', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        SUPABASE_ACCESS_TOKEN: access_token,
       },
-    );
+    });
     const json = await res.json();
     console.log('Backend Response is', res.status, json);
     setWarranties(json['data']);
@@ -98,9 +88,7 @@ export default function GetWarranties() {
             ListHeaderComponent={() => (
               <View style={styleSheet.table_row}>
                 {TABLE_HEADERS.map(col => (
-                  <Text style={[styleSheet.table_cell, styleSheet.bold_cell]}>
-                    {col.label}
-                  </Text>
+                  <Text style={[styleSheet.table_cell, styleSheet.bold_cell]}>{col.label}</Text>
                 ))}
               </View>
             )}
@@ -108,13 +96,9 @@ export default function GetWarranties() {
               <View style={styleSheet.table_row}>
                 <Text style={styleSheet.table_cell}>{item.id}</Text>
                 <Text style={styleSheet.table_cell}>{item.product_name}</Text>
-                <Text style={styleSheet.table_cell}>
-                  {item.product_categories.join(',')}
-                </Text>
+                <Text style={styleSheet.table_cell}>{item.product_categories.join(',')}</Text>
                 <Text style={styleSheet.table_cell}>{item.purchase_date}</Text>
-                <Text style={styleSheet.table_cell}>
-                  {item.expiration_date}
-                </Text>
+                <Text style={styleSheet.table_cell}>{item.expiration_date}</Text>
               </View>
             )}
             keyExtractor={item => item.id.toString()}

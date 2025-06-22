@@ -1,11 +1,4 @@
-import {
-  StyleSheet,
-  View,
-  Text,
-  TextInput,
-  Button,
-  ActivityIndicator,
-} from 'react-native';
+import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 import { storeSession } from '../helpers/storage';
@@ -26,22 +19,16 @@ export default function Login() {
       password: password,
     };
     console.log('Form Data is', data);
-    const res = await fetch(
-      process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/auth/login',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      },
-    );
+    const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
     const json = await res.json();
     console.log('Backend Response is', res.status, json);
     if (json['success']) {
       let session_details = json['data']['session'];
-      await storeSession(
-        'SUPABASE_ACCESS_TOKEN',
-        session_details['access_token'],
-      );
+      await storeSession('SUPABASE_ACCESS_TOKEN', session_details['access_token']);
       //await storeSession("SUPABASE_USER_ID", session_details["user"]["id"]);
       showMessage({ type: 'success', message: 'Successful Login!' });
       setSubmitLoading(false);
@@ -98,11 +85,7 @@ export default function Login() {
       />
 
       <View style={styleSheet.submitButtonViewWrapper}>
-        {submitLoading ? (
-          <ActivityIndicator size="small" />
-        ) : (
-          <Button title="Login" onPress={handleSubmitButton} />
-        )}
+        {submitLoading ? <ActivityIndicator size="small" /> : <Button title="Login" onPress={handleSubmitButton} />}
       </View>
 
       <FlashMessage position="top" />
