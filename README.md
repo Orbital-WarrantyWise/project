@@ -47,6 +47,7 @@ If you would like to deploy WarrantyWise locally, please follow the instructions
   - [ ] Deploy a stable version with all core and extension features
 
 ## Tech Stack
+
 1. Frontend/Mobile: Expo
 2. Backend: Express
 3. Database: Supabase
@@ -55,3 +56,26 @@ If you would like to deploy WarrantyWise locally, please follow the instructions
 6. Notifications: Twilio
 7. Authentication: NextAuth, Google SSO
 8. Containerization: Docker
+
+## Style Guide
+
+We use an opinionated code formatter, [`Prettier`](https://prettier.io/), to handle the formatting for a fuss-free style guide that supports multiple languages. Notably, we've configured some of the defaults to match our own styling:
+
+- `arrowParens`: "avoid"
+  - Avoiding clutter by omitting parentheses where possible
+- `singleQuote`: true
+  - Simply because
+- `trailingCommas`: "all"
+  - To standardise the ending of lines in commas, for easier reference as to where each line ends
+- `printWidth`: 120
+  - We find Prettier's default of 80 to be a bit too short to our liking
+
+We've stuck to some of Prettier's sensible defauls, such as enforcing the use of semicolons. We do not enforce the variable/function naming conventions as there are 2 widely accepted interchangeable conventions used in React/React Native projects:
+
+- camelCase
+  - Used for general variables and functions
+- CamelCase
+  - Similar to the previous convention, except the first letter is also capitalised
+  - Used for React/React Native functions used in rendering
+
+Declaring a function in JavaScript via arrow function (e.g. `const add = (x, y) -> x + y;`) or via function declaration (e.g. `function add(x, y) { return x + y; }`) is accepted.
