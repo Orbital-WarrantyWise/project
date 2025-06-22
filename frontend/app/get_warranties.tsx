@@ -88,7 +88,9 @@ export default function GetWarranties() {
             ListHeaderComponent={() => (
               <View style={styleSheet.table_row}>
                 {TABLE_HEADERS.map(col => (
-                  <Text style={[styleSheet.table_cell, styleSheet.bold_cell]}>{col.label}</Text>
+                  <Text key={col.key} style={[styleSheet.table_cell, styleSheet.bold_cell]}>
+                    {col.label}
+                  </Text>
                 ))}
               </View>
             )}
