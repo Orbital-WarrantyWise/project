@@ -1,37 +1,59 @@
 import type { Request, Response } from 'express';
 import supabase from '../client';
+import { StatusCodes } from 'http-status-codes';
 
 const WarrantyController = {
   createWarranty: async (req: Request, res: Response) => {
     console.log('Received Body', req.body);
-    req.body.user_id = req.middleware_data.user_id; // Inject user_id obtained from middleware
+    const user_id = req.middleware_data.user_id; // Get user_id obtained from middleware
     // TODO: Use zod to ensure proper shape of `req.body`
-    const { error } = await supabase.from('warranties').insert(req.body);
+    const { error } = await supabase.from('warranties').insert({ ...req.body, user_id });
     console.log('Supabase Response', error);
     if (error) {
-      res.status(400).json({
+      res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
         error: error,
       });
     } else {
-      res.status(200).json({
+      res.status(StatusCodes.OK).json({
         success: true,
       });
     }
   },
 
   getWarranty: async (req: Request, res: Response) => {
-    console.log('Received Body', req.body);
     const user_id = req.middleware_data.user_id; // Get user_id obtained from middleware
     const { data, error } = await supabase.from('warranties').select().eq('user_id', user_id);
     console.log('Supabase Response', data, error);
     if (error) {
-      res.status(400).json({
+      res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
         error: error,
       });
     } else {
-      res.status(200).json({
+      res.status(StatusCodes.OK).json({
+        success: true,
+        data: data,
+      });
+    }
+  },
+
+  searchWarranty: async (req: Request, res: Response) => {
+    console.log('Received Body', req.body);
+    const user_id = req.middleware_data.user_id; // Inject user_id obtained from middleware
+    const { product_name }: { product_name: string } = req.body;
+    const { data, error } = await supabase
+      .from('warranties')
+      .select()
+      .eq('user_id', user_id)
+      .like('product_name', `%${product_name}%`);
+    if (error) {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        error: error,
+      });
+    } else {
+      res.status(StatusCodes.OK).json({
         success: true,
         data: data,
       });
