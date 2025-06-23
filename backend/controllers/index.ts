@@ -5,8 +5,9 @@ const WarrantyController = {
   createWarranty: async (req: Request, res: Response) => {
     console.log('Received Body', req.body);
     req.body.user_id = req.middleware_data.user_id; // Inject user_id obtained from middleware
-    const { data, error } = await supabase.from('warranties').insert(req.body);
-    console.log('Supabase Response', data, error);
+    // TODO: Use zod to ensure proper shape of `req.body`
+    const { error } = await supabase.from('warranties').insert(req.body);
+    console.log('Supabase Response', error);
     if (error) {
       res.status(400).json({
         success: false,
