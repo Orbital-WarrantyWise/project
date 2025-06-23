@@ -1,4 +1,5 @@
 import express from 'express';
+
 import WarrantyController from '../controllers';
 import { validateData } from '../middleware/validation';
 import { searchWarrantySchema } from '../schemas';

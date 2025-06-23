@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+
 import { Database } from './database.types';
 
 if (!process.env.SUPABASE_URL) throw new Error('SUPABASE_URL is not defined');

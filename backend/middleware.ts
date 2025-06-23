@@ -1,6 +1,7 @@
-import type { Request, Response, NextFunction } from 'express';
-import supabase from './client';
+import type { NextFunction,Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
+
+import supabase from './client';
 
 export async function authRequired(req: Request, res: Response, next: NextFunction) {
   console.log('Received Header', req.headers); // Note: All header keys are converted to lowercase

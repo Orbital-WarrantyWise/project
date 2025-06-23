@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
-import supabase from '../client';
 import { StatusCodes } from 'http-status-codes';
+
+import supabase from '../client';
 
 const WarrantyController = {
   createWarranty: async (req: Request, res: Response) => {
