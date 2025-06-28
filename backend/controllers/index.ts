@@ -46,7 +46,7 @@ const WarrantyController = {
       .from('warranties')
       .select()
       .eq('user_id', user_id)
-      .like('product_name', `%${product_name}%`);
+      .ilike('product_name', `%${product_name}%`);
     if (error) {
       res.status(StatusCodes.BAD_REQUEST).json({
         success: false,

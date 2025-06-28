@@ -13,7 +13,7 @@ npm install
 3. Run backend
 
 ```bash
-node --env-file=.env app.js
+npm start
 ```
 
 ## Vercel
