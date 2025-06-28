@@ -32,7 +32,7 @@ export default function AddWarranty() {
     setSubmitLoading(true);
     const data = {
       product_name: productName,
-      product_categories: productCategories.split(','),  // TODO: Also handle whitespaces
+      product_categories: productCategories.split(','), // TODO: Also handle whitespaces
       purchase_date: formatDate(purchaseDate),
       expiration_date: formatDate(expirationDate),
     };
