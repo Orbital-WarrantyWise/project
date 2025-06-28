@@ -1,8 +1,9 @@
-import express from 'express';
 import cors from 'cors';
+import express from 'express';
+
 import { authRequired } from './middleware';
-import { router as AuthRouter } from './routes/auth';
 import { router as WarrantyRouter } from './routes';
+import { router as AuthRouter } from './routes/auth';
 
 declare module 'express-serve-static-core' {
   interface Request {

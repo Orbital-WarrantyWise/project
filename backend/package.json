@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node -r ts-node/register --env-file=.env app.ts",
     "lint": "eslint . --ext ts",
+    "lint:fix": "eslint . --ext ts --fix",
     "format": "prettier . --write"
   },
   "keywords": [],
@@ -14,7 +15,9 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
     "cors": "^2.8.5",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "http-status-codes": "^2.3.0",
+    "zod": "^3.25.67"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
@@ -23,6 +26,7 @@
     "@types/node": "^24.0.3",
     "eslint": "^9.29.0",
     "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
     "prettier": "^3.5.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",

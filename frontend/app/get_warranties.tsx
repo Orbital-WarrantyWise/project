@@ -1,17 +1,9 @@
-import { StyleSheet, View, Button, FlatList, Text, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, FlatList, Text } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 import { getSession } from '../helpers/storage';
-
-interface Warranty {
-  id: number;
-  created_at: string;
-  product_name: string;
-  product_categories: string[];
-  purchase_date: string;
-  expiration_date: string;
-}
+import type { Warranty } from '@/helpers/types';
 
 const TABLE_HEADERS = [
   { key: 'id', label: 'ID' },
@@ -25,31 +17,34 @@ export default function GetWarranties() {
   const [warranties, setWarranties] = useState<Warranty[]>();
   const [submitLoading, setSubmitLoading] = useState(false);
 
-  const handleLoadButton = async () => {
-    if (submitLoading) return; // Just in case
-    const access_token = await getSession('SUPABASE_ACCESS_TOKEN');
-    if (access_token == null) {
-      showMessage({
-        type: 'danger',
-        message: 'Missing Access Token! Login First!',
-      });
-      return;
-    }
+  useEffect(() => {
+    const load = async () => {
+      if (submitLoading) return; // Just in case
+      const access_token = await getSession('SUPABASE_ACCESS_TOKEN');
+      if (access_token == null) {
+        showMessage({
+          type: 'danger',
+          message: 'Missing Access Token! Login First!',
+        });
+        return;
+      }
 
-    setSubmitLoading(true);
-    console.log('Sending Request to Backend...');
-    const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/warranty', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        SUPABASE_ACCESS_TOKEN: access_token,
-      },
-    });
-    const json = await res.json();
-    console.log('Backend Response is', res.status, json);
-    setWarranties(json['data']);
-    setSubmitLoading(false);
-  };
+      setSubmitLoading(true);
+      console.log('Sending Request to Backend...');
+      const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/warranty', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          SUPABASE_ACCESS_TOKEN: access_token,
+        },
+      });
+      const json = await res.json();
+      console.log('Backend Response is', res.status, json);
+      setWarranties(json['data']);
+      setSubmitLoading(false);
+    };
+    load();
+  }, []);
 
   const styleSheet = StyleSheet.create({
     scrollableView: {
@@ -73,14 +68,6 @@ export default function GetWarranties() {
 
   return (
     <View style={styleSheet.scrollableView}>
-      <View>
-        {submitLoading ? (
-          <ActivityIndicator size="small" />
-        ) : (
-          <Button title="Load Warranties" onPress={handleLoadButton} />
-        )}
-      </View>
-
       <SafeAreaProvider>
         <SafeAreaView style={styleSheet.scrollableView}>
           <FlatList

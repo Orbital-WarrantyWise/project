@@ -64,6 +64,15 @@ export default function Index() {
               }}
             />
           </View>
+
+          <View style={styleSheet.buttonViewWrapper}>
+            <Button
+              title="Search Warranties"
+              onPress={() => {
+                navigation.navigate('search_warranties');
+              }}
+            />
+          </View>
         </View>
       ) : (
         <View>

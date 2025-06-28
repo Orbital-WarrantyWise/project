@@ -34,7 +34,7 @@ If you would like to deploy WarrantyWise locally, please follow the instructions
   - [x] Allow users to manually add warranty details (Feature 1)
   - [x] Deploy a simple working version on Vercel and Supabase
 - Milestone 2 - Prototype (i.e., a working system with the core features)
-  - [ ] Implement the search functionality (Feature 2)
+  - [x] Implement the search functionality (Feature 2)
   - [ ] Develop email/push notifications for expiring warranties (Feature 3)
   - [ ] Improve the UI/UX for warranty management
   - [ ] Conduct user testing and iterate based on feedback
