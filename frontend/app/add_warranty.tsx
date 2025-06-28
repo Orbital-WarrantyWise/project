@@ -32,7 +32,7 @@ export default function AddWarranty() {
     setSubmitLoading(true);
     const data = {
       product_name: productName,
-      product_categories: productCategories.split(','),
+      product_categories: productCategories.split(','),  // TODO: Also handle whitespaces
       purchase_date: formatDate(purchaseDate),
       expiration_date: formatDate(expirationDate),
     };
@@ -93,7 +93,7 @@ export default function AddWarranty() {
         style={styleSheet.textInput}
         value={productCategories}
         onChangeText={setProductCategories}
-        placeholder="Electonics,Software"
+        placeholder="Electronics,Software"
         placeholderTextColor="#808080"
       />
 
