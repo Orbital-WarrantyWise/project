@@ -9,4 +9,5 @@ export const createWarrantySchema = z.object({
 
 export const searchWarrantySchema = z.object({
   product_name: z.string(),
+  // product_categories: z.array(z.string()),
 });

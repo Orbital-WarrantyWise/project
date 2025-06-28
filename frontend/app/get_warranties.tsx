@@ -3,15 +3,7 @@ import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 import { getSession } from '../helpers/storage';
-
-interface Warranty {
-  id: number;
-  created_at: string;
-  product_name: string;
-  product_categories: string[];
-  purchase_date: string;
-  expiration_date: string;
-}
+import type { Warranty } from '@/helpers/types';
 
 const TABLE_HEADERS = [
   { key: 'id', label: 'ID' },
