@@ -5,6 +5,7 @@
   "main": "app.ts",
   "scripts": {
     "start": "node -r ts-node/register --env-file=.env app.ts",
+    "dev": "node --watch -r ts-node/register --env-file=.env app.ts",
     "lint": "eslint . --ext ts",
     "lint:fix": "eslint . --ext ts --fix",
     "format": "prettier . --write"
