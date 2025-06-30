@@ -7,6 +7,13 @@ export const createWarrantySchema = z.object({
   expiration_date: z.iso.date(),
 });
 
+export const editWarrantySchema = z.object({
+  product_name: z.string(),
+  product_categories: z.array(z.string()),
+  purchase_date: z.iso.date(),
+  expiration_date: z.iso.date(),
+});
+
 export const searchWarrantySchema = z.object({
   product_name: z.string(),
   // product_categories: z.array(z.string()),
