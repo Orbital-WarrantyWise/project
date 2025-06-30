@@ -2,11 +2,12 @@ import express from 'express';
 
 import WarrantyController from '../controllers';
 import { validateData } from '../middleware/validation';
-import { createWarrantySchema, editWarrantySchema, searchWarrantySchema } from '../schemas';
+import WarrantySchema from '../schemas';
 
 export const router = express.Router();
 
-router.get('/', WarrantyController.getWarranty);
-router.post('/', validateData(createWarrantySchema), WarrantyController.createWarranty);
-router.put('/:warrantyId(\\d+)', validateData(editWarrantySchema), WarrantyController.editWarranty);
-router.post('/search', validateData(searchWarrantySchema), WarrantyController.searchWarranty);
+router.get('/', WarrantyController.getWarranties);
+router.get('/:warrantyId(\\d+)', WarrantyController.getWarranty);
+router.post('/', validateData(WarrantySchema.createWarrantySchema), WarrantyController.createWarranty);
+router.put('/:warrantyId(\\d+)', validateData(WarrantySchema.editWarrantySchema), WarrantyController.editWarranty);
+router.post('/search', validateData(WarrantySchema.searchWarrantySchema), WarrantyController.searchWarranty);

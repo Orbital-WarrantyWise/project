@@ -3,8 +3,9 @@ import { StatusCodes } from 'http-status-codes';
 
 import supabase from '../client';
 
-const WarrantyController = {
-  getWarranty: async (req: Request, res: Response) => {
+const WarrantyController: { [key: string]: (req: Request, res: Response) => Promise<void> } = {
+  // TODO: Support pagination for many warranties
+  getWarranties: async (req, res) => {
     const user_id = req.middleware_data.user_id; // Get user_id obtained from middleware
     const { data, error } = await supabase.from('warranties').select().eq('user_id', user_id);
     console.log('Supabase Response', data, error);
@@ -21,7 +22,25 @@ const WarrantyController = {
     }
   },
 
-  createWarranty: async (req: Request, res: Response) => {
+  getWarranty: async (req, res) => {
+    const id = parseInt(req.params['warrantyId']);
+    const user_id = req.middleware_data.user_id;
+    const { data, error } = await supabase.from('warranties').select().eq('user_id', user_id).eq('id', id).single();
+    console.log('Supabase Response', data, error);
+    if (error) {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        error: error,
+      });
+    } else {
+      res.status(StatusCodes.OK).json({
+        success: true,
+        data: data,
+      });
+    }
+  },
+
+  createWarranty: async (req, res) => {
     console.log('Received Body', req.body);
     const user_id = req.middleware_data.user_id; // Get user_id obtained from middleware
     const { error } = await supabase.from('warranties').insert({ ...req.body, user_id });
@@ -38,7 +57,7 @@ const WarrantyController = {
     }
   },
 
-  editWarranty: async (req: Request, res: Response) => {
+  editWarranty: async (req, res) => {
     console.log("Received Body', req.body");
     const user_id = req.middleware_data.user_id; // Get user_id obtained from middleware
     const id = parseInt(req.params['warrantyId']);
@@ -62,7 +81,7 @@ const WarrantyController = {
     }
   },
 
-  searchWarranty: async (req: Request, res: Response) => {
+  searchWarranty: async (req, res) => {
     console.log('Received Body', req.body);
     const user_id = req.middleware_data.user_id; // Inject user_id obtained from middleware
     const { product_name }: { product_name: string } = req.body;

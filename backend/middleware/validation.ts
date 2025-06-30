@@ -1,6 +1,6 @@
-import { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { z, ZodError } from 'zod/v4';
+import { type z, ZodError } from 'zod/v4';
 
 export function validateData(schema: z.ZodObject) {
   return (req: Request, res: Response, next: NextFunction) => {
