@@ -1,11 +1,11 @@
 import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
-import { storeSession } from '../helpers/storage';
-import { useNavigation } from '@react-navigation/native';
+import { storeSession } from '@/helpers/storage';
+import { useRouter } from 'expo-router';
 
 export default function Login() {
-  const navigation = useNavigation<any>();
+  const router = useRouter();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,7 +32,7 @@ export default function Login() {
       //await storeSession("SUPABASE_USER_ID", session_details["user"]["id"]);
       showMessage({ type: 'success', message: 'Successful Login!' });
       setSubmitLoading(false);
-      navigation.replace('index');
+      router.replace('/');
     } else {
       let error_details = json['error'];
       showMessage({

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { DatePickerModal } from 'react-native-paper-dates'; // Tried https://github.com/react-native-datetimepicker/datetimepicker and https://github.com/mmazzarolo/react-native-modal-datetime-picker, but both don't work on Web
 import { format } from 'date-fns';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
-import { getSession } from '../helpers/storage';
+import { getSession } from '@/helpers/storage';
 
 export default function AddWarranty() {
   const [productName, setProductName] = useState('');

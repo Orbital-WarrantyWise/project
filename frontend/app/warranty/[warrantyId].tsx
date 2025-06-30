@@ -1,0 +1,192 @@
+import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from 'react-native';
+import { useEffect, useState } from 'react';
+import { DatePickerModal } from 'react-native-paper-dates'; // Tried https://github.com/react-native-datetimepicker/datetimepicker and https://github.com/mmazzarolo/react-native-modal-datetime-picker, but both don't work on Web
+import { format } from 'date-fns';
+import FlashMessage, { showMessage } from 'react-native-flash-message';
+import { getSession } from '@/helpers/storage';
+import { useLocalSearchParams } from 'expo-router';
+
+export default function EditWarranty() {
+  const params = useLocalSearchParams<{ warrantyId: string }>();
+
+  const [productName, setProductName] = useState('');
+  const [productCategories, setProductCategories] = useState('');
+  const [openPurchaseDatePicker, setOpenPurchaseDatePicker] = useState(false);
+  const [purchaseDate, setPurchaseDate] = useState(new Date());
+  const [openExpirationDatePicker, setOpenExpirationDatePicker] = useState(false);
+  const [expirationDate, setExpirationDate] = useState(new Date());
+  const [submitLoading, setSubmitLoading] = useState(false);
+
+  const formatDate = (date: Date) => {
+    return format(date, 'yyyy-MM-dd'); // Ref: https://date-fns.org/docs/format
+  };
+
+  useEffect(() => {
+    const load = async () => {
+      if (submitLoading) return; // Just in case
+      const access_token = await getSession('SUPABASE_ACCESS_TOKEN');
+      if (access_token == null) {
+        showMessage({
+          type: 'danger',
+          message: 'Missing Access Token! Login First!',
+        });
+        return;
+      }
+
+      setSubmitLoading(true);
+      console.log('Sending Request to Backend...');
+      const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + `/warranty/${params.warrantyId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          SUPABASE_ACCESS_TOKEN: access_token,
+        },
+      });
+      const json = await res.json();
+      console.log('Backend Response is', res.status, json);
+      setProductName(json['data']['product_name']);
+      setProductCategories(json['data']['product_categories'].join(','));
+      setPurchaseDate(json['data']['purchase_date']);
+      setExpirationDate(json['data']['expiration_date']);
+      setSubmitLoading(false);
+    };
+    load();
+  }, []);
+
+  const handleSubmitButton = async () => {
+    if (submitLoading) return; // Just in case
+    const access_token = await getSession('SUPABASE_ACCESS_TOKEN');
+    if (access_token == null) {
+      showMessage({
+        type: 'danger',
+        message: 'Missing Access Token! Login First!',
+      });
+      return;
+    }
+
+    setSubmitLoading(true);
+    const data = {
+      product_name: productName,
+      product_categories: productCategories.split(','), // TODO: Also handle whitespaces
+      purchase_date: formatDate(purchaseDate),
+      expiration_date: formatDate(expirationDate),
+    };
+    console.log('Form Data is', data);
+    const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + `/warranty/${params.warrantyId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        SUPABASE_ACCESS_TOKEN: access_token,
+      },
+      body: JSON.stringify(data),
+    });
+    const json = await res.json();
+    console.log('Backend Response is', res.status, json);
+    if (json['success']) {
+      showMessage({ type: 'success', message: 'Successfully Edited Warranty!' });
+    } else {
+      showMessage({ type: 'danger', message: 'Failed to Edit Warranty!' });
+    }
+    setSubmitLoading(false);
+  };
+
+  const styleSheet = StyleSheet.create({
+    textLabel: {
+      marginBottom: 5,
+    },
+    textInput: {
+      marginBottom: 15,
+      borderWidth: 1,
+    },
+    datePickerButtonViewWrapper: {
+      marginBottom: 15,
+    },
+    submitButtonViewWrapper: {
+      marginTop: 15,
+    },
+  });
+
+  if (submitLoading) return <ActivityIndicator size="small" />;
+
+  return (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <Text style={styleSheet.textLabel}>Product Name:</Text>
+      <TextInput
+        style={styleSheet.textInput}
+        value={productName}
+        onChangeText={setProductName}
+        placeholder="Laptop"
+        placeholderTextColor="#808080"
+      />
+
+      <Text style={styleSheet.textLabel}>Product Categories (Comma-Separated):</Text>
+      <TextInput
+        style={styleSheet.textInput}
+        value={productCategories}
+        onChangeText={setProductCategories}
+        placeholder="Electronics,Software"
+        placeholderTextColor="#808080"
+      />
+
+      <Text style={styleSheet.textLabel}>Purchase Date:</Text>
+      <View style={styleSheet.datePickerButtonViewWrapper}>
+        <Button
+          title={formatDate(purchaseDate)}
+          onPress={() => {
+            setOpenPurchaseDatePicker(true);
+          }}
+        />
+      </View>
+      <DatePickerModal
+        locale="en"
+        mode="single"
+        visible={openPurchaseDatePicker}
+        onDismiss={() => {
+          setOpenPurchaseDatePicker(false);
+        }}
+        date={purchaseDate}
+        onConfirm={(params: any) => {
+          console.log('PurchaseDatePicker', params);
+          setOpenPurchaseDatePicker(false);
+          setPurchaseDate(params.date);
+        }}
+      />
+
+      <Text style={styleSheet.textLabel}>Expiration Date:</Text>
+      <View style={styleSheet.datePickerButtonViewWrapper}>
+        <Button
+          title={formatDate(expirationDate)}
+          onPress={() => {
+            setOpenExpirationDatePicker(true);
+          }}
+        />
+      </View>
+      <DatePickerModal
+        locale="en"
+        mode="single"
+        visible={openExpirationDatePicker}
+        onDismiss={() => {
+          setOpenExpirationDatePicker(false);
+        }}
+        date={expirationDate}
+        onConfirm={(params: any) => {
+          console.log('ExpirationDatePicker', params);
+          setOpenExpirationDatePicker(false);
+          setExpirationDate(params.date);
+        }}
+      />
+
+      <View style={styleSheet.submitButtonViewWrapper}>
+        <Button title="Edit Warranty" onPress={handleSubmitButton} />
+      </View>
+
+      <FlashMessage position="top" />
+    </View>
+  );
+}
