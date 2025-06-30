@@ -1,10 +1,10 @@
 import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 
 export default function Register() {
-  const navigation = useNavigation<any>();
+  const router = useRouter();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,7 +30,7 @@ export default function Register() {
         type: 'success',
         message: 'Successfully Registered Account!',
       });
-      navigation.replace('login');
+      router.replace('/login');
       setSubmitLoading(false);
     } else {
       let error_details = json['error'];

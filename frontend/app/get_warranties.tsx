@@ -1,12 +1,12 @@
-import { StyleSheet, View, FlatList, Text } from 'react-native';
+import { StyleSheet, View, FlatList, Text, Button } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
-import { getSession } from '../helpers/storage';
+import { getSession } from '@/helpers/storage';
 import type { Warranty } from '@/helpers/types';
+import { useRouter } from 'expo-router';
 
 const TABLE_HEADERS = [
-  { key: 'id', label: 'ID' },
   { key: 'product_name', label: 'Product Name' },
   { key: 'product_categories', label: 'Product Categories' },
   { key: 'purchase_date', label: 'Purchase Date' },
@@ -16,6 +16,7 @@ const TABLE_HEADERS = [
 export default function GetWarranties() {
   const [warranties, setWarranties] = useState<Warranty[]>();
   const [submitLoading, setSubmitLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const load = async () => {
@@ -79,15 +80,26 @@ export default function GetWarranties() {
                     {col.label}
                   </Text>
                 ))}
+                <Text style={[styleSheet.table_cell, styleSheet.bold_cell]}>Edit</Text>
               </View>
             )}
             renderItem={({ item }) => (
               <View style={styleSheet.table_row}>
-                <Text style={styleSheet.table_cell}>{item.id}</Text>
                 <Text style={styleSheet.table_cell}>{item.product_name}</Text>
                 <Text style={styleSheet.table_cell}>{item.product_categories.join(',')}</Text>
                 <Text style={styleSheet.table_cell}>{item.purchase_date}</Text>
                 <Text style={styleSheet.table_cell}>{item.expiration_date}</Text>
+                <View>
+                  <Button
+                    title="Edit"
+                    onPress={() => {
+                      router.navigate({
+                        pathname: '/warranty/[warrantyId]',
+                        params: { warrantyId: item.id },
+                      });
+                    }}
+                  />
+                </View>
               </View>
             )}
             keyExtractor={item => item.id.toString()}

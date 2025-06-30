@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, Image, Button } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { getSession, clearSession } from '../helpers/storage';
+import { getSession, clearSession } from '@/helpers/storage';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
 
 export default function Index() {
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
@@ -12,7 +12,7 @@ export default function Index() {
     });
   }, []);
 
-  const navigation = useNavigation<any>();
+  const router = useRouter();
   const styleSheet = StyleSheet.create({
     logoLabel: {
       marginBottom: 5,
@@ -51,7 +51,7 @@ export default function Index() {
             <Button
               title="New Warranty"
               onPress={() => {
-                navigation.navigate('add_warranty');
+                router.navigate('/add_warranty');
               }}
             />
           </View>
@@ -60,7 +60,7 @@ export default function Index() {
             <Button
               title="List Warranties"
               onPress={() => {
-                navigation.navigate('get_warranties');
+                router.navigate('/get_warranties');
               }}
             />
           </View>
@@ -69,7 +69,7 @@ export default function Index() {
             <Button
               title="Search Warranties"
               onPress={() => {
-                navigation.navigate('search_warranties');
+                router.navigate('/search_warranties');
               }}
             />
           </View>
@@ -80,7 +80,7 @@ export default function Index() {
             <Button
               title="Register"
               onPress={() => {
-                navigation.navigate('register');
+                router.navigate('/register');
               }}
             />
           </View>
@@ -89,7 +89,7 @@ export default function Index() {
             <Button
               title="Login"
               onPress={() => {
-                navigation.navigate('login');
+                router.navigate('/login');
               }}
             />
           </View>
