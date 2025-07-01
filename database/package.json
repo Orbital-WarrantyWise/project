@@ -1,8 +1,9 @@
 {
   "scripts": {
-    "start": "supabase start"
+    "start": "supabase start",
+    "gen:types": "supabase gen types typescript --local > ../backend/database.types.ts"
   },
   "devDependencies": {
-    "supabase": "^2.23.4"
+    "supabase": "^2.26.9"
   }
 }

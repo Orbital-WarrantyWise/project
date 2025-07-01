@@ -1,0 +1,34 @@
+name: Database Checks
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+    paths:
+      - "database/**"
+
+defaults:
+  run:
+    working-directory: database
+
+jobs:
+  test-type-generation:
+    name: Supabase Type Generation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - run: supabase start
+      - name: Verify generated types
+        env:
+          TYPES_PATH: database.types.ts
+        run: |
+          supabase gen types typescript --local > $TYPES_PATH
+          if ! git diff --ignore-space-at-eol --exit-code --quiet $TYPES_PATH; then
+            echo "Detected uncommitted changes after build. Run genTypes.sh and commit the result. See status below:"
+            git diff
+            exit 1
+          fi
