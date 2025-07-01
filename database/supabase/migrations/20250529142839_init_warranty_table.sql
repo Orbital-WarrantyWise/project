@@ -27,12 +27,14 @@ SET default_table_access_method = "heap";
 
 
 CREATE TABLE IF NOT EXISTS "public"."warranties" (
-    "id" bigint NOT NULL,
+    "id" bigint PRIMARY KEY,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "product_name" "text" NOT NULL,
+    "product_name" "text" UNIQUE NOT NULL,
     "product_categories" "text"[] NOT NULL,
     "purchase_date" "date" NOT NULL,
-    "expiration_date" "date" NOT NULL
+    "expiration_date" "date" NOT NULL,
+    CHECK ("expiration_date" > "purchase_date"),
+    CHECK (cardinality("product_categories") = (SELECT COUNT(DISTINCT x) FROM unnest("product_categories") AS x))
 );
 
 
