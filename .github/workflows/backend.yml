@@ -26,7 +26,7 @@ jobs:
         env:
           TYPES_PATH: database.types.ts
         run: |
-          supabase gen types typescript --local > $TYPES_PATH
+          supabase gen types typescript --local --schema public > $TYPES_PATH
           if ! git diff --ignore-space-at-eol --exit-code --quiet $TYPES_PATH; then
             echo "Detected uncommitted changes after build. Run genTypes.sh and commit the result. See status below:"
             git diff
