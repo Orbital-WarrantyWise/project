@@ -51,5 +51,5 @@ npx supabase login
 2. Generate types
 
 ```bash
-npx supabase gen types typescript --project-id <supabase_project_id> > database.types.ts
+npm run gen:types
 ```

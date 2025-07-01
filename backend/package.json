@@ -8,7 +8,8 @@
     "dev": "node --watch -r ts-node/register --env-file=.env app.ts",
     "lint": "eslint . --ext ts",
     "lint:fix": "eslint . --ext ts --fix",
-    "format": "prettier . --write"
+    "format": "prettier --write .",
+    "gen:types": " supabase gen types typescript --project-id cvckfqjdlwoxqufafoff > database.types.ts"
   },
   "keywords": [],
   "author": "",
@@ -29,6 +30,7 @@
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "prettier": "^3.5.3",
+    "supabase": "^2.26.9",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.34.1"
