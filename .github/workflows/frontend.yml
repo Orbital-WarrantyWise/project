@@ -24,18 +24,18 @@ jobs:
       - name: Setup Node LTS ✨
         uses: actions/setup-node@v4
         with:
-          cache: npm
+          cache: pnpm
           cache-dependency-path: frontend
           node-version: lts/*
 
       - name: Installing dependencies 📦️
-        run: npm ci
+        run: pnpm ci
 
       - name: Lint 🛀
-        run: npm run lint
+        run: pnpm run lint
 
       - name: Format 🧹
-        run: npm run format
+        run: pnpm run format
 
       - name: Commit changes if any
         run: |
