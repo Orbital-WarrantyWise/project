@@ -9,7 +9,7 @@
     "lint": "eslint . --ext ts",
     "lint:fix": "eslint . --ext ts --fix",
     "format": "prettier --write .",
-    "gen:types": " supabase gen types typescript --project-id cvckfqjdlwoxqufafoff > database.types.ts"
+    "gen:types": "dotenv supabase gen types typescript --project-id %SUPABASE_PROJECT_ID% > database.types.ts"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +26,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^24.0.3",
+    "dotenv-cli": "^8.0.0",
     "eslint": "^9.29.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-simple-import-sort": "^12.1.1",
