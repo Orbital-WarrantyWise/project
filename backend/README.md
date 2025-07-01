@@ -37,19 +37,3 @@ vercel --prod
 ```
 
 4. Go to the "Settings" tab of your Backend Project on Vercel, click "Environment Variables" in the sidebar, and upload the `.env` file (remembering to change the URLs accordingly)
-
-## Supabase
-
-To generate types for TypeScript support:
-
-1. Login to Supabase
-
-```bash
-npx supabase login
-```
-
-2. Generate types
-
-```bash
-npm run gen:types
-```
