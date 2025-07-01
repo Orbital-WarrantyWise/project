@@ -4,7 +4,6 @@
     "gen:types": "supabase gen types typescript --local > ../backend/database.types.ts"
   },
   "devDependencies": {
-    "dotenv-cli": "^8.0.0",
     "supabase": "^2.26.9"
   }
 }
