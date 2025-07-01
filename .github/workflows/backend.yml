@@ -1,4 +1,4 @@
-name: Lint and Format
+name: Backend Checks
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
       - run: supabase start
       - name: Verify generated types
         env:
-          TYPES_PATH: database.gen.ts
+          TYPES_PATH: database.types.ts
         run: |
           supabase gen types typescript --local > $TYPES_PATH
           if ! git diff --ignore-space-at-eol --exit-code --quiet $TYPES_PATH; then
