@@ -19,9 +19,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
-      - run: supabase start
         with:
           version: latest
+      - run: supabase start
       - name: Verify generated types
         env:
           TYPES_PATH: database.types.ts
