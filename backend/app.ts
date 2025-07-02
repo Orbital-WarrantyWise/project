@@ -5,12 +5,6 @@ import { authRequired } from './middleware';
 import { router as WarrantyRouter } from './routes';
 import { router as AuthRouter } from './routes/auth';
 
-declare module 'express-serve-static-core' {
-  interface Request {
-    middleware_data: { user_id: string };
-  }
-}
-
 const app = express();
 const port = 8000;
 

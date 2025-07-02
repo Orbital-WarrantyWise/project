@@ -7,7 +7,7 @@
 2. Install dependencies
 
 ```bash
-npm install
+pnpm install
 ```
 
 3. Run frontend
@@ -21,7 +21,7 @@ npx expo start
 1. Install Vercel
 
 ```bash
-npm i -g vercel
+pnpm i -g vercel
 ```
 
 2. Login to Vercel

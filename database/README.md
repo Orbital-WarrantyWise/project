@@ -3,7 +3,7 @@
 1. Install dependencies
 
 ```bash
-npm install
+pnpm install
 ```
 
 2. Run docker instance
@@ -30,11 +30,11 @@ npx supabase login
 2. Run local supabase instances
 
 ```bash
-npm run start
+pnpm run start
 ```
 
 3. Generate types
 
 ```bash
-npm run gen:types
+pnpm run gen:types
 ```

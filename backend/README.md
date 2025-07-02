@@ -7,13 +7,13 @@
 2. Install dependencies
 
 ```bash
-npm install
+pnpm install
 ```
 
 3. Run backend
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 ## Vercel
@@ -21,7 +21,7 @@ npm run dev
 1. Install Vercel
 
 ```bash
-npm i -g vercel
+pnpm i -g vercel
 ```
 
 2. Login to Vercel
