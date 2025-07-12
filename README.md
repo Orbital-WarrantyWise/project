@@ -78,4 +78,4 @@ We've stuck to some of Prettier's sensible defauls, such as enforcing the use of
   - Similar to the previous convention, except the first letter is also capitalised
   - Used for React/React Native functions used in rendering
 
-Declaring a function in JavaScript via arrow function (e.g. `const add = (x, y) -> x + y;`) or via function declaration (e.g. `function add(x, y) { return x + y; }`) is accepted.
+Declaring a function in JavaScript via arrow function (e.g. `const add = (x, y) => x + y;`) or via function declaration (e.g. `function add(x, y) { return x + y; }`) is accepted.
