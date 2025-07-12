@@ -38,7 +38,12 @@ For each replacement product, extract the following information:
 - Product URL (e.g. https://website.com)
 `;
 
-async function getRecommendation({product_name, product_description, product_categories, purchase_date}: z.infer<typeof AISchema.recommendation>) {
+async function getRecommendation({
+  product_name,
+  product_description,
+  product_categories,
+  purchase_date,
+}: z.infer<typeof AISchema.recommendation>) {
   try {
     const imputedPrompt = generatePrompt(product_name, product_description, product_categories, purchase_date);
     const response = await ai.models.generateContent({
@@ -52,9 +57,9 @@ async function getRecommendation({product_name, product_description, product_cat
         ],
       },
     });
-    return {'data': response.text, 'error': null};
+    return { data: response.text, error: null };
   } catch (err) {
-    return {'data': null, 'error': err};
+    return { data: null, error: err };
   }
 }
 
