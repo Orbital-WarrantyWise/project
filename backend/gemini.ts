@@ -1,4 +1,7 @@
 import { GoogleGenAI } from '@google/genai';
+import { z } from 'zod/v4';
+
+import AISchema from './schemas/ai';
 
 // Adapted from https://ai.google.dev/gemini-api/docs/google-search#javascript
 const ai = new GoogleGenAI({
@@ -35,25 +38,24 @@ For each replacement product, extract the following information:
 - Product URL (e.g. https://website.com)
 `;
 
-async function main() {
-  const imputedPrompt = generatePrompt(
-    'Netflix',
-    'Used to watch shows at home after work',
-    ['Entertainment'],
-    '20 May 2025',
-  );
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: imputedPrompt,
-    config: {
-      tools: [
-        {
-          googleSearch: {},
-        },
-      ],
-    },
-  });
-  console.log(response.text);
+async function getRecommendation({product_name, product_description, product_categories, purchase_date}: z.infer<typeof AISchema.recommendation>) {
+  try {
+    const imputedPrompt = generatePrompt(product_name, product_description, product_categories, purchase_date);
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: imputedPrompt,
+      config: {
+        tools: [
+          {
+            googleSearch: {},
+          },
+        ],
+      },
+    });
+    return {'data': response.text, 'error': null};
+  } catch (err) {
+    return {'data': null, 'error': err};
+  }
 }
 
-main();
+export default getRecommendation;

@@ -4,6 +4,7 @@ import express from 'express';
 import { authRequired } from './middleware';
 import { router as WarrantyRouter } from './routes';
 import { router as AuthRouter } from './routes/auth';
+import { router as AIRouter } from './routes/ai';
 
 const app = express();
 const port = 8000;
@@ -13,6 +14,7 @@ app.use(express.json()); // Ensure req recieved is in json
 
 app.use('/auth', AuthRouter);
 app.use('/warranty', authRequired, WarrantyRouter);
+app.use('/ai', authRequired, AIRouter);
 
 app.get('/healthcheck', (req, res) => {
   res.json({
