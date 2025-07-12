@@ -3,8 +3,8 @@ import express from 'express';
 
 import { authRequired } from './middleware';
 import { router as WarrantyRouter } from './routes';
-import { router as AuthRouter } from './routes/auth';
 import { router as AIRouter } from './routes/ai';
+import { router as AuthRouter } from './routes/auth';
 
 const app = express();
 const port = 8000;
