@@ -27,7 +27,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: pnpm
-          cache-dependency-path: backend/pnpm-lock.yaml
+          cache-dependency-path: backend/package.json
           node-version: lts/*
 
       - name: Installing dependencies 📦️
