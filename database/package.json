@@ -1,7 +1,8 @@
 {
+  "name": "warrantywise-database",
   "scripts": {
     "start": "supabase start",
-    "gen:types": "supabase gen types typescript --local > ../backend/database.types.ts"
+    "gen:types": "supabase gen types typescript --local > database.types.ts"
   },
   "devDependencies": {
     "supabase": "^2.26.9"

@@ -1,0 +1,8 @@
+packages:
+  - backend/
+  - database/
+  - frontend/
+
+onlyBuiltDependencies:
+  - supabase
+  - unrs-resolver
