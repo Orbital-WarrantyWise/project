@@ -2,13 +2,31 @@ import { StyleSheet, Text, View, Image, Button } from 'react-native';
 import { getSession, clearSession } from '@/helpers/storage';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
+import { jwtDecode } from 'jwt-decode';
 
 export default function Index() {
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
 
   useEffect(() => {
-    getSession('SUPABASE_ACCESS_TOKEN').then(val => {
-      setLoggedIn(val !== null);
+    getSession('SUPABASE_ACCESS_TOKEN').then(token => {
+      if (token === null) return;
+
+      let loggedIn = false;
+
+      try {
+        const decoded = jwtDecode(token);
+        console.log(decoded);
+        loggedIn = decoded.exp !== undefined && decoded.exp > Math.round(Date.now() / 1000);
+      } catch {
+        console.warn('Error decoding JWT');
+      }
+
+      if (loggedIn) {
+        setLoggedIn(true);
+      } else {
+        // Remove erroneous or expired JWT
+        clearSession('SUPABASE_ACCESS_TOKEN');
+      }
     });
   }, []);
 
