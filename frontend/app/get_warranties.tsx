@@ -1,10 +1,11 @@
-import { StyleSheet, View, FlatList, Text, Button } from 'react-native';
+import { StyleSheet, View, FlatList, Text, Button, Modal, ScrollView } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 import { getSession } from '@/helpers/storage';
 import type { Warranty } from '@/helpers/types';
 import { useRouter } from 'expo-router';
+import Markdown from 'react-native-markdown-display';
 
 const TABLE_HEADERS = [
   { key: 'product_name', label: 'Product Name' },
@@ -15,12 +16,15 @@ const TABLE_HEADERS = [
 
 export default function GetWarranties() {
   const [warranties, setWarranties] = useState<Warranty[]>();
-  const [submitLoading, setSubmitLoading] = useState(false);
+  const [initLoading, setInitLoading] = useState(false);
+  const [aiRecommendation, setAiRecommendation] = useState<string>();
+  const [showAIRecommendationPopup, setShowAIRecommendationPopup] = useState(false);
+  const [aiRecommendationLoading, setAiRecommendationLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     const load = async () => {
-      if (submitLoading) return; // Just in case
+      if (initLoading) return; // Just in case
       const access_token = await getSession('SUPABASE_ACCESS_TOKEN');
       if (access_token == null) {
         showMessage({
@@ -30,7 +34,7 @@ export default function GetWarranties() {
         return;
       }
 
-      setSubmitLoading(true);
+      setInitLoading(true);
       console.log('Sending Request to Backend...');
       const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/warranty', {
         method: 'GET',
@@ -42,10 +46,51 @@ export default function GetWarranties() {
       const json = await res.json();
       console.log('Backend Response is', res.status, json);
       setWarranties(json['data']);
-      setSubmitLoading(false);
+      setInitLoading(false);
     };
     load();
   }, []);
+
+  const openAIRecommendationPopup = async (item: Warranty) => {
+    if (aiRecommendationLoading) return; // Prevents wastage of tokens as well
+    const access_token = await getSession('SUPABASE_ACCESS_TOKEN');
+    if (access_token == null) {
+      showMessage({
+        type: 'danger',
+        message: 'Missing Access Token! Login First!',
+      });
+      return;
+    }
+
+    setAiRecommendationLoading(true);
+    showMessage({
+      type: 'info',
+      message: 'Generating AI Recommendation, please wait up to 1 min...',
+    });
+    const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/ai/recommendation', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        SUPABASE_ACCESS_TOKEN: access_token,
+      },
+      body: JSON.stringify({
+        product_name: item.product_name,
+        product_description: '', // TODO: Add this field to Warranty schema
+        product_categories: item.product_categories,
+        purchase_date: item.purchase_date,
+      }),
+    });
+
+    const json = await res.json();
+    setAiRecommendationLoading(false);
+    setShowAIRecommendationPopup(true);
+    setAiRecommendation(json['data']);
+  };
+
+  const closeAIRecommendationPopup = () => {
+    setShowAIRecommendationPopup(false);
+    setAiRecommendation('');
+  };
 
   const styleSheet = StyleSheet.create({
     scrollableView: {
@@ -65,6 +110,23 @@ export default function GetWarranties() {
     bold_cell: {
       fontWeight: 'bold',
     },
+    modal_overlay: {
+      flex: 1, // Needed to display correctly
+      backgroundColor: 'rgba(0, 0, 0, 0.5)', // Dim the original background
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    popup_window: {
+      backgroundColor: '#ffffff', // White popup background
+      padding: 20,
+      borderRadius: 10, // Makes border look rounded and nicer
+      width: '80%', // Prevent popup from completely covering background
+      maxHeight: '80%', // Prevent popup from completely covering background
+    },
+    popup_title: {
+      textAlign: 'center',
+      fontWeight: 'bold',
+    },
   });
 
   return (
@@ -81,6 +143,7 @@ export default function GetWarranties() {
                   </Text>
                 ))}
                 <Text style={[styleSheet.table_cell, styleSheet.bold_cell]}>Edit</Text>
+                <Text style={[styleSheet.table_cell, styleSheet.bold_cell]}>AI Recommendation</Text>
               </View>
             )}
             renderItem={({ item }) => (
@@ -100,10 +163,30 @@ export default function GetWarranties() {
                     }}
                   />
                 </View>
+                <View>
+                  <Button
+                    title="AI Recommendation"
+                    onPress={() => {
+                      openAIRecommendationPopup(item);
+                    }}
+                    disabled={aiRecommendationLoading}
+                  />
+                </View>
               </View>
             )}
             keyExtractor={item => item.id.toString()}
           />
+          <Modal visible={showAIRecommendationPopup} onRequestClose={closeAIRecommendationPopup} transparent={true}>
+            <View style={styleSheet.modal_overlay}>
+              <View style={styleSheet.popup_window}>
+                <Text style={styleSheet.popup_title}>AI Recommendation</Text>
+                <ScrollView>
+                  <Markdown>{aiRecommendation}</Markdown>
+                </ScrollView>
+                <Button title="Close" onPress={closeAIRecommendationPopup} />
+              </View>
+            </View>
+          </Modal>
         </SafeAreaView>
       </SafeAreaProvider>
 
