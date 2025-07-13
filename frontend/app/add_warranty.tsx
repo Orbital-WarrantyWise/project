@@ -1,10 +1,11 @@
-import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator, Image } from 'react-native';
+import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator, Image, Platform } from 'react-native';
 import { useState } from 'react';
 import { DatePickerModal } from 'react-native-paper-dates'; // Tried https://github.com/react-native-datetimepicker/datetimepicker and https://github.com/mmazzarolo/react-native-modal-datetime-picker, but both don't work on Web
 import { format } from 'date-fns';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '@/helpers/supabase';
+import { decode } from 'base64-arraybuffer';
 
 export default function AddWarranty() {
   const [productName, setProductName] = useState('');
@@ -48,10 +49,32 @@ export default function AddWarranty() {
       user_id: (await supabase.auth.getUser()).data.user?.id,
     };
     console.log('Form Data is', data);
-    const { error } = await supabase.from('warranties').insert(data);
+    const { data: warranty, error } = await supabase.from('warranties').insert(data).select().single();
     if (error) {
       showMessage({ type: 'danger', message: 'Failed to Add Warranty!' });
     } else {
+      if (image) {
+        let res;
+        if (Platform.OS === 'web') {
+          const fileExt = image.file!.name.split('.').pop();
+          res = await supabase.storage
+            .from('images')
+            .upload(`${(await supabase.auth.getUser()).data.user?.id}/${warranty.id}.${fileExt}`, image.file!);
+        } else {
+          const fileExt = image.uri.split('.').pop();
+          res = await supabase.storage
+            .from('images')
+            .upload(
+              `${(await supabase.auth.getUser()).data.user?.id}/${warranty.id}.${fileExt}`,
+              decode(image.base64!),
+              {
+                contentType: image.mimeType,
+              },
+            );
+        }
+        // TODO: Handle error if uploading to storage fails
+        console.log(res.error);
+      }
       showMessage({ type: 'success', message: 'Successfully Added Warranty!' });
     }
     setSubmitLoading(false);
