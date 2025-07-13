@@ -7,6 +7,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '@/helpers/supabase';
 import { decode } from 'base64-arraybuffer';
 
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+
 export default function AddWarranty() {
   const [productName, setProductName] = useState('');
   const [productCategories, setProductCategories] = useState('');
@@ -38,6 +40,11 @@ export default function AddWarranty() {
 
   const handleSubmitButton = async () => {
     if (submitLoading) return; // Just in case
+    // Ensure image size is less than 5 MB
+    if (image && image.fileSize && image.fileSize >= MAX_IMAGE_SIZE) {
+      showMessage({ type: 'danger', message: 'Image exceeds 5MB, please use a smaller image!' });
+      return;
+    }
 
     setSubmitLoading(true);
 

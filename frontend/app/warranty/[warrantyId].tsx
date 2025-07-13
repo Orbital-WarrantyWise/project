@@ -30,15 +30,17 @@ export default function EditWarranty() {
         // TODO: Handle error
         console.log(error);
       } else {
-        const image = images[0];
-        const { data, error } = await supabase.storage
-          .from('images')
-          .createSignedUrl(`${(await supabase.auth.getUser()).data.user?.id}/${image.name}`, 3600);
-        if (error) {
-          // TODO: Handle error
-          console.log(error);
-        } else {
-          setSignedUrl(data.signedUrl);
+        if (images.length !== 0) {
+          const image = images[0];
+          const { data, error } = await supabase.storage
+            .from('images')
+            .createSignedUrl(`${(await supabase.auth.getUser()).data.user?.id}/${image.name}`, 3600);
+          if (error) {
+            // TODO: Handle error
+            console.log(error);
+          } else {
+            setSignedUrl(data.signedUrl);
+          }
         }
       }
     };
