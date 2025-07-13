@@ -1,4 +1,4 @@
-import { getSession } from '@/helpers/storage';
+import { getFromSecureStorage } from '@/helpers/secureStorage';
 import type { Warranty } from '@/helpers/types';
 import React, { useEffect, useState } from 'react';
 import { View, TextInput, Text, FlatList, StyleSheet } from 'react-native';
@@ -22,7 +22,7 @@ export default function WarrantySearchPage() {
   useEffect(() => {
     const search = async () => {
       if (submitLoading) return;
-      const access_token = await getSession('SUPABASE_ACCESS_TOKEN');
+      const access_token = await getFromSecureStorage('SUPABASE_ACCESS_TOKEN');
       if (access_token === null) {
         showMessage({
           type: 'danger',

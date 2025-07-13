@@ -2,7 +2,7 @@ import { StyleSheet, View, FlatList, Text, Button, Modal, ScrollView } from 'rea
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
-import { getSession } from '@/helpers/storage';
+import { getFromSecureStorage } from '@/helpers/secureStorage';
 import type { Warranty } from '@/helpers/types';
 import { useRouter } from 'expo-router';
 import Markdown from 'react-native-markdown-display';
@@ -25,7 +25,7 @@ export default function GetWarranties() {
   useEffect(() => {
     const load = async () => {
       if (initLoading) return; // Just in case
-      const access_token = await getSession('SUPABASE_ACCESS_TOKEN');
+      const access_token = await getFromSecureStorage('SUPABASE_ACCESS_TOKEN');
       if (access_token === null) {
         showMessage({
           type: 'danger',
@@ -53,7 +53,7 @@ export default function GetWarranties() {
 
   const openAIRecommendationPopup = async (item: Warranty) => {
     if (aiRecommendationLoading) return; // Prevents wastage of tokens as well
-    const access_token = await getSession('SUPABASE_ACCESS_TOKEN');
+    const access_token = await getFromSecureStorage('SUPABASE_ACCESS_TOKEN');
     if (access_token === null) {
       showMessage({
         type: 'danger',

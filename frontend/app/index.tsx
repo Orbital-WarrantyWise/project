@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, Image, Button } from 'react-native';
-import { getSession, clearSession } from '@/helpers/storage';
+import { getFromSecureStorage, clearFromSecureStorage } from '@/helpers/secureStorage';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { jwtDecode } from 'jwt-decode';
@@ -8,7 +8,7 @@ export default function Index() {
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
 
   useEffect(() => {
-    getSession('SUPABASE_ACCESS_TOKEN').then(token => {
+    getFromSecureStorage('SUPABASE_ACCESS_TOKEN').then(token => {
       if (token === null) return;
 
       let loggedIn = false;
@@ -25,7 +25,7 @@ export default function Index() {
         setLoggedIn(true);
       } else {
         // Remove erroneous or expired JWT
-        clearSession('SUPABASE_ACCESS_TOKEN');
+        clearFromSecureStorage('SUPABASE_ACCESS_TOKEN');
       }
     });
   }, []);
@@ -58,7 +58,7 @@ export default function Index() {
             <Button
               title="Logout"
               onPress={() => {
-                clearSession('SUPABASE_ACCESS_TOKEN').then(() => {
+                clearFromSecureStorage('SUPABASE_ACCESS_TOKEN').then(() => {
                   setLoggedIn(false);
                 });
               }}

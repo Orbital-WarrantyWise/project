@@ -1,7 +1,7 @@
 import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
-import { storeSession } from '@/helpers/storage';
+import { saveToSecureStorage } from '@/helpers/secureStorage';
 import { useRouter } from 'expo-router';
 
 export default function Login() {
@@ -28,7 +28,7 @@ export default function Login() {
     console.log('Backend Response is', res.status, json);
     if (json['success']) {
       let session_details = json['data']['session'];
-      await storeSession('SUPABASE_ACCESS_TOKEN', session_details['access_token']);
+      await saveToSecureStorage('SUPABASE_ACCESS_TOKEN', session_details['access_token']);
       //await storeSession("SUPABASE_USER_ID", session_details["user"]["id"]);
       showMessage({ type: 'success', message: 'Successful Login!' });
       setSubmitLoading(false);
