@@ -2,6 +2,7 @@ import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from 're
 import { useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
 import { useRouter } from 'expo-router';
+import { supabase } from '@/helpers/supabase';
 
 export default function Register() {
   const router = useRouter();
@@ -18,42 +19,23 @@ export default function Register() {
       password: password,
     };
     console.log('Form Data is', data);
-    const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    const json = await res.json();
-    console.log('Backend Response is', res.status, json);
-    if (json['success']) {
+    const res = await supabase.auth.signUp(data);
+
+    if (res.error) {
+      showMessage({
+        type: 'danger',
+        message: `Failed to Register Account! [${res.error.name}: ${res.error.message}]`,
+      });
+      setSubmitLoading(false);
+    } else {
       showMessage({
         type: 'success',
         message: 'Successfully Registered Account!',
       });
       router.replace('/login');
       setSubmitLoading(false);
-    } else {
-      let error_details = json['error'];
-      showMessage({
-        type: 'danger',
-        message: `Failed to Register Account! [${error_details['code']}: ${error_details['name']}]`,
-      });
-      setSubmitLoading(false);
     }
   };
-
-  const styleSheet = StyleSheet.create({
-    textLabel: {
-      marginBottom: 5,
-    },
-    textInput: {
-      marginBottom: 15,
-      borderWidth: 1,
-    },
-    submitButtonViewWrapper: {
-      marginTop: 15,
-    },
-  });
 
   return (
     <View
@@ -91,3 +73,16 @@ export default function Register() {
     </View>
   );
 }
+
+const styleSheet = StyleSheet.create({
+  textLabel: {
+    marginBottom: 5,
+  },
+  textInput: {
+    marginBottom: 15,
+    borderWidth: 1,
+  },
+  submitButtonViewWrapper: {
+    marginTop: 15,
+  },
+});
