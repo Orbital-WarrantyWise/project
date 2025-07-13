@@ -1,8 +1,8 @@
 import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
-import { storeSession } from '@/helpers/storage';
 import { useRouter } from 'expo-router';
+import { supabase } from '@/helpers/supabase';
 
 export default function Login() {
   const router = useRouter();
@@ -19,42 +19,19 @@ export default function Login() {
       password: password,
     };
     console.log('Form Data is', data);
-    const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    const json = await res.json();
-    console.log('Backend Response is', res.status, json);
-    if (json['success']) {
-      let session_details = json['data']['session'];
-      await storeSession('SUPABASE_ACCESS_TOKEN', session_details['access_token']);
-      //await storeSession("SUPABASE_USER_ID", session_details["user"]["id"]);
+    const res = await supabase.auth.signInWithPassword(data);
+    if (res.error) {
+      showMessage({
+        type: 'danger',
+        message: `Failed to Login! [${res.error.name}: ${res.error.message}]`,
+      });
+      setSubmitLoading(false);
+    } else {
       showMessage({ type: 'success', message: 'Successful Login!' });
       setSubmitLoading(false);
       router.replace('/');
-    } else {
-      let error_details = json['error'];
-      showMessage({
-        type: 'danger',
-        message: `Failed to Login! [${error_details['code']}: ${error_details['name']}]`,
-      });
-      setSubmitLoading(false);
     }
   };
-
-  const styleSheet = StyleSheet.create({
-    textLabel: {
-      marginBottom: 5,
-    },
-    textInput: {
-      marginBottom: 15,
-      borderWidth: 1,
-    },
-    submitButtonViewWrapper: {
-      marginTop: 15,
-    },
-  });
 
   return (
     <View
@@ -92,3 +69,16 @@ export default function Login() {
     </View>
   );
 }
+
+const styleSheet = StyleSheet.create({
+  textLabel: {
+    marginBottom: 5,
+  },
+  textInput: {
+    marginBottom: 15,
+    borderWidth: 1,
+  },
+  submitButtonViewWrapper: {
+    marginTop: 15,
+  },
+});

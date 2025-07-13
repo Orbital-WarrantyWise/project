@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 import { DatePickerModal } from 'react-native-paper-dates'; // Tried https://github.com/react-native-datetimepicker/datetimepicker and https://github.com/mmazzarolo/react-native-modal-datetime-picker, but both don't work on Web
 import { format } from 'date-fns';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
-import { getSession } from '@/helpers/storage';
 import { useLocalSearchParams } from 'expo-router';
+import { supabase } from '@/helpers/supabase';
 
 export default function EditWarranty() {
   const params = useLocalSearchParams<{ warrantyId: string }>();
@@ -24,45 +24,30 @@ export default function EditWarranty() {
   useEffect(() => {
     const load = async () => {
       if (submitLoading) return; // Just in case
-      const access_token = await getSession('SUPABASE_ACCESS_TOKEN');
-      if (access_token == null) {
-        showMessage({
-          type: 'danger',
-          message: 'Missing Access Token! Login First!',
-        });
+
+      setSubmitLoading(true);
+      const { data, error } = await supabase
+        .from('warranties')
+        .select()
+        .eq('id', Number.parseInt(params.warrantyId))
+        .single();
+      setSubmitLoading(false);
+      if (error) {
+        // TODO: Handle error
         return;
       }
 
-      setSubmitLoading(true);
-      console.log('Sending Request to Backend...');
-      const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + `/warranty/${params.warrantyId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          SUPABASE_ACCESS_TOKEN: access_token,
-        },
-      });
-      const json = await res.json();
-      console.log('Backend Response is', res.status, json);
-      setProductName(json['data']['product_name']);
-      setProductCategories(json['data']['product_categories'].join(','));
-      setPurchaseDate(json['data']['purchase_date']);
-      setExpirationDate(json['data']['expiration_date']);
+      setProductName(data.product_name);
+      setProductCategories(data.product_categories.join(','));
+      setPurchaseDate(new Date(data.purchase_date));
+      setExpirationDate(new Date(data.expiration_date));
       setSubmitLoading(false);
     };
     load();
-  }, []);
+  }, [params.warrantyId]);
 
   const handleSubmitButton = async () => {
     if (submitLoading) return; // Just in case
-    const access_token = await getSession('SUPABASE_ACCESS_TOKEN');
-    if (access_token == null) {
-      showMessage({
-        type: 'danger',
-        message: 'Missing Access Token! Login First!',
-      });
-      return;
-    }
 
     setSubmitLoading(true);
     const data = {
@@ -71,40 +56,15 @@ export default function EditWarranty() {
       purchase_date: formatDate(purchaseDate),
       expiration_date: formatDate(expirationDate),
     };
-    console.log('Form Data is', data);
-    const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + `/warranty/${params.warrantyId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        SUPABASE_ACCESS_TOKEN: access_token,
-      },
-      body: JSON.stringify(data),
-    });
-    const json = await res.json();
-    console.log('Backend Response is', res.status, json);
-    if (json['success']) {
-      showMessage({ type: 'success', message: 'Successfully Edited Warranty!' });
-    } else {
+    const { error } = await supabase.from('warranties').update(data).eq('id', Number.parseInt(params.warrantyId));
+
+    if (error) {
       showMessage({ type: 'danger', message: 'Failed to Edit Warranty!' });
+    } else {
+      showMessage({ type: 'success', message: 'Successfully Edited Warranty!' });
     }
     setSubmitLoading(false);
   };
-
-  const styleSheet = StyleSheet.create({
-    textLabel: {
-      marginBottom: 5,
-    },
-    textInput: {
-      marginBottom: 15,
-      borderWidth: 1,
-    },
-    datePickerButtonViewWrapper: {
-      marginBottom: 15,
-    },
-    submitButtonViewWrapper: {
-      marginTop: 15,
-    },
-  });
 
   if (submitLoading) return <ActivityIndicator size="small" />;
 
@@ -190,3 +150,19 @@ export default function EditWarranty() {
     </View>
   );
 }
+
+const styleSheet = StyleSheet.create({
+  textLabel: {
+    marginBottom: 5,
+  },
+  textInput: {
+    marginBottom: 15,
+    borderWidth: 1,
+  },
+  datePickerButtonViewWrapper: {
+    marginBottom: 15,
+  },
+  submitButtonViewWrapper: {
+    marginTop: 15,
+  },
+});

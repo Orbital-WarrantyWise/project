@@ -1,9 +1,10 @@
-import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator, Image } from 'react-native';
 import { useState } from 'react';
 import { DatePickerModal } from 'react-native-paper-dates'; // Tried https://github.com/react-native-datetimepicker/datetimepicker and https://github.com/mmazzarolo/react-native-modal-datetime-picker, but both don't work on Web
 import { format } from 'date-fns';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
-import { getSession } from '@/helpers/storage';
+import * as ImagePicker from 'expo-image-picker';
+import { supabase } from '@/helpers/supabase';
 
 export default function AddWarranty() {
   const [productName, setProductName] = useState('');
@@ -13,6 +14,22 @@ export default function AddWarranty() {
   const [openExpirationDatePicker, setOpenExpirationDatePicker] = useState(false);
   const [expirationDate, setExpirationDate] = useState(new Date());
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
+
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      quality: 1,
+      exif: true,
+      base64: true,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0]);
+    }
+  };
 
   const formatDate = (date: Date) => {
     return format(date, 'yyyy-MM-dd'); // Ref: https://date-fns.org/docs/format
@@ -20,56 +37,25 @@ export default function AddWarranty() {
 
   const handleSubmitButton = async () => {
     if (submitLoading) return; // Just in case
-    const access_token = await getSession('SUPABASE_ACCESS_TOKEN');
-    if (access_token == null) {
-      showMessage({
-        type: 'danger',
-        message: 'Missing Access Token! Login First!',
-      });
-      return;
-    }
 
     setSubmitLoading(true);
+
     const data = {
       product_name: productName,
       product_categories: productCategories.split(','), // TODO: Also handle whitespaces
       purchase_date: formatDate(purchaseDate),
       expiration_date: formatDate(expirationDate),
+      user_id: (await supabase.auth.getUser()).data.user?.id,
     };
     console.log('Form Data is', data);
-    const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/warranty', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        SUPABASE_ACCESS_TOKEN: access_token,
-      },
-      body: JSON.stringify(data),
-    });
-    const json = await res.json();
-    console.log('Backend Response is', res.status, json);
-    if (json['success']) {
-      showMessage({ type: 'success', message: 'Successfully Added Warranty!' });
-    } else {
+    const { error } = await supabase.from('warranties').insert(data);
+    if (error) {
       showMessage({ type: 'danger', message: 'Failed to Add Warranty!' });
+    } else {
+      showMessage({ type: 'success', message: 'Successfully Added Warranty!' });
     }
     setSubmitLoading(false);
   };
-
-  const styleSheet = StyleSheet.create({
-    textLabel: {
-      marginBottom: 5,
-    },
-    textInput: {
-      marginBottom: 15,
-      borderWidth: 1,
-    },
-    datePickerButtonViewWrapper: {
-      marginBottom: 15,
-    },
-    submitButtonViewWrapper: {
-      marginTop: 15,
-    },
-  });
 
   return (
     <View
@@ -79,6 +65,10 @@ export default function AddWarranty() {
         alignItems: 'center',
       }}
     >
+      <Text style={styleSheet.textLabel}>Warranty images:</Text>
+      <Button title="Pick an image from camera roll" onPress={pickImage} />
+      {image && <Image source={{ uri: image.uri }} style={styleSheet.image} />}
+
       <Text style={styleSheet.textLabel}>Product Name:</Text>
       <TextInput
         style={styleSheet.textInput}
@@ -157,3 +147,23 @@ export default function AddWarranty() {
     </View>
   );
 }
+
+const styleSheet = StyleSheet.create({
+  textLabel: {
+    marginBottom: 5,
+  },
+  textInput: {
+    marginBottom: 15,
+    borderWidth: 1,
+  },
+  datePickerButtonViewWrapper: {
+    marginBottom: 15,
+  },
+  submitButtonViewWrapper: {
+    marginTop: 15,
+  },
+  image: {
+    width: 200,
+    height: 200,
+  },
+});
