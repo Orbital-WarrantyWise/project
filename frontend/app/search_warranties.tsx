@@ -23,7 +23,7 @@ export default function WarrantySearchPage() {
     const search = async () => {
       if (submitLoading) return;
       const access_token = await getSession('SUPABASE_ACCESS_TOKEN');
-      if (access_token == null) {
+      if (access_token === null) {
         showMessage({
           type: 'danger',
           message: 'Missing Access Token! Login First!',

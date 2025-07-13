@@ -21,7 +21,7 @@ export default function AddWarranty() {
   const handleSubmitButton = async () => {
     if (submitLoading) return; // Just in case
     const access_token = await getSession('SUPABASE_ACCESS_TOKEN');
-    if (access_token == null) {
+    if (access_token === null) {
       showMessage({
         type: 'danger',
         message: 'Missing Access Token! Login First!',

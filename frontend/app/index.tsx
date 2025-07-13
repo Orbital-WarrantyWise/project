@@ -8,7 +8,7 @@ export default function Index() {
 
   useEffect(() => {
     getSession('SUPABASE_ACCESS_TOKEN').then(val => {
-      setLoggedIn(val != null);
+      setLoggedIn(val !== null);
     });
   }, []);
 
