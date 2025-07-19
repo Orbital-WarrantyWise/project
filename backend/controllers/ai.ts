@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { getRecommendation, getOCR } from '../gemini';
+import { getOCR,getRecommendation } from '../gemini';
 
 const AIController = {
   recommendation: async (req: Request, res: Response) => {

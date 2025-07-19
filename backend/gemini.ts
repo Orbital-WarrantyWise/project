@@ -148,4 +148,4 @@ async function getOCR({ b64Image, mimeType }: z.infer<typeof AISchema.ocrInput>)
   }
 }
 
-export { getRecommendation, getOCR };
+export { getOCR,getRecommendation };
