@@ -81,11 +81,28 @@ You may use the internet to convert product IDs (e.g. SKU12345XA) into product n
 However, you must ensure that the information obtained via the internet is accurate, coherent, and consistent with the information available in the image or document. For instance, if you searched the internet for the product ID and found a product with brand X with the same product ID, BUT the receipt shows that the product has brand Y, then you MUST ignore the information obtained from the internet as it's inconsistent with the receipt (i.e. you must treat the receipt as the ground truth, and not the internet).
 
 If certain product information (e.g. name, price, etc.) is unavailable, missing, unclear, or contradictory, that is perfectly acceptable, but you MUST return an empty string corresponding to that field.
+
+Please strictly respond with valid JSON matching the schema ${JSON.stringify(z.toJSONSchema(AISchema.ocrOutput))}.
 `;
+
+function cleanResponse(input_str: string) {
+  let clean_str = input_str.trim(); // Remove any leading/trailing whitespaces
+  if (clean_str.startsWith('```json')) { // Remove any leading code blocks
+    clean_str = clean_str.substring(7);
+  } else if (clean_str.startsWith('```')) {
+    clean_str = clean_str.substring(3);
+  }
+  if (clean_str.endsWith('```')) {
+    clean_str = clean_str.substring(0, clean_str.length-3);
+  }
+  return JSON.parse(clean_str)
+}
 
 async function getOCR({b64Image, mimeType}: z.infer<typeof AISchema.ocrInput>) {
   try {
     const prompt = generateOCRPrompt();
+
+    // Rather annoyingly, Gemini supports structured output and tool use, but not simultaneously... so I've used a workaround to get it to generate structured output
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: [
@@ -107,7 +124,17 @@ async function getOCR({b64Image, mimeType}: z.infer<typeof AISchema.ocrInput>) {
         ],
       },
     });
-    return { data: response.text, error: null };
+
+    if (!response || !response.text) {
+      throw new Error("Invalid response from Gemini")
+    }
+    console.log("Raw Response", response.text);
+
+    const cleanedResponse = cleanResponse(response.text);
+    console.log("Cleaned Response", cleanedResponse);
+
+    AISchema.ocrOutput.parse(cleanedResponse); // Throws error if unable to parse, TODO: retry mechanism
+    return { data: cleanedResponse, error: null };
   } catch (err) {
     return { data: null, error: err };
   }
