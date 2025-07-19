@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator, Image, Platform } from 'react-native';
+import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator, Image, Platform, Modal } from 'react-native';
 import { useState } from 'react';
 import { DatePickerModal } from 'react-native-paper-dates'; // Tried https://github.com/react-native-datetimepicker/datetimepicker and https://github.com/mmazzarolo/react-native-modal-datetime-picker, but both don't work on Web
 import { format } from 'date-fns';
@@ -18,6 +18,12 @@ export default function AddWarranty() {
   const [expirationDate, setExpirationDate] = useState(new Date());
   const [submitLoading, setSubmitLoading] = useState(false);
   const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
+  const [showOCRPopup, setShowOCRPopup] = useState(false);
+  const [ocrLoading, setOcrLoading] = useState(false);
+
+  const formatDate = (date: Date) => {
+    return format(date, 'yyyy-MM-dd'); // Ref: https://date-fns.org/docs/format
+  };
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -31,12 +37,67 @@ export default function AddWarranty() {
 
     if (!result.canceled) {
       setImage(result.assets[0]);
+      setShowOCRPopup(true);
     }
   };
 
-  const formatDate = (date: Date) => {
-    return format(date, 'yyyy-MM-dd'); // Ref: https://date-fns.org/docs/format
+  const closeOCRPopup = () => {
+    setShowOCRPopup(false);
   };
+
+  const handleOCRButton = async () => {
+    if (ocrLoading || !image) return; // Just in case
+    // Ensure image size is less than 5 MB
+    if (image && image.fileSize && image.fileSize >= MAX_IMAGE_SIZE) {
+      showMessage({ type: 'danger', message: 'Image exceeds 5MB, please use a smaller image!' });
+      return;
+    }
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (session == null) {
+      showMessage({
+        type: 'danger',
+        message: 'Missing Access Token! Login First!',
+      });
+      return;
+    }
+    const { access_token } = session;
+
+    setOcrLoading(true);
+
+    const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/ai/ocr', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        SUPABASE_ACCESS_TOKEN: access_token,
+      },
+      body: JSON.stringify({
+        b64Image: image.base64,
+        mimeType: image.mimeType,
+      }),
+    });
+
+    const json = await res.json();
+    console.log("Backend Response", json)
+    if (json['success']) {
+      const jsonData = json["data"] // TODO: Purchase date, description, warranty duration
+      setProductName(jsonData["product_name"])
+      setPurchaseDate(new Date(jsonData["purchase_date"]))
+      showMessage({
+        type: 'success',
+        message: 'Successfully fetched AI OCR!',
+      });
+    } else {
+      showMessage({
+        type: 'danger',
+        message: `Error fetching AI OCR: ${json['error']}`,
+      });
+    }
+    setOcrLoading(false);
+    closeOCRPopup();
+  }
 
   const handleSubmitButton = async () => {
     if (submitLoading) return; // Just in case
@@ -173,6 +234,23 @@ export default function AddWarranty() {
         )}
       </View>
 
+      <Modal visible={showOCRPopup} onRequestClose={closeOCRPopup} transparent={true}>
+        <View style={styleSheet.modal_overlay}>
+          <View style={styleSheet.popup_window}>
+            <Text style={styleSheet.popup_title}>AI OCR</Text>
+            <Text>Would you like to use AI OCR to automatically extract warranty details from this image?</Text>
+            {ocrLoading ? (
+              <ActivityIndicator size="small" />
+            ) : (
+              <View style={styleSheet.button_container}>
+                <Button title="Yes" onPress={handleOCRButton} />
+                <Button title="No" onPress={closeOCRPopup} />
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
+
       <FlashMessage position="top" />
     </View>
   );
@@ -195,5 +273,26 @@ const styleSheet = StyleSheet.create({
   image: {
     width: 200,
     height: 200,
+  },
+  modal_overlay: {
+    flex: 1, // Needed to display correctly
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Dim the original background
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  popup_window: {
+    backgroundColor: '#ffffff', // White popup background
+    padding: 20,
+    borderRadius: 10, // Makes border look rounded and nicer
+    width: '80%', // Prevent popup from completely covering background
+    maxHeight: '80%', // Prevent popup from completely covering background
+  },
+  popup_title: {
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },
+  button_container: {
+    flexDirection: 'row', // Make 2 buttons side-by-side in the same row
+    justifyContent: 'space-around', // Spread 2 buttons apart
   },
 });
