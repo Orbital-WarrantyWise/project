@@ -7,3 +7,4 @@ import AISchema from '../schemas/ai';
 export const router = express.Router();
 
 router.post('/recommendation', validateData(AISchema.recommendation), AIController.recommendation);
+router.post('/ocr', validateData(AISchema.ocrInput), AIController.ocr);
