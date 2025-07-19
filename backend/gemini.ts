@@ -45,7 +45,12 @@ async function getRecommendation({
   purchase_date,
 }: z.infer<typeof AISchema.recommendation>) {
   try {
-    const imputedPrompt = generateRecommendationPrompt(product_name, product_description, product_categories, purchase_date);
+    const imputedPrompt = generateRecommendationPrompt(
+      product_name,
+      product_description,
+      product_categories,
+      purchase_date,
+    );
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: imputedPrompt,
@@ -87,18 +92,21 @@ Please strictly respond with valid JSON matching the schema ${JSON.stringify(z.t
 
 function cleanResponse(input_str: string) {
   let clean_str = input_str.trim(); // Remove any leading/trailing whitespaces
-  if (clean_str.startsWith('```json')) { // Remove any leading code blocks
+
+  // Remove any leading code blocks
+  if (clean_str.startsWith('```json')) {
     clean_str = clean_str.substring(7);
   } else if (clean_str.startsWith('```')) {
     clean_str = clean_str.substring(3);
   }
   if (clean_str.endsWith('```')) {
-    clean_str = clean_str.substring(0, clean_str.length-3);
+    clean_str = clean_str.substring(0, clean_str.length - 3);
   }
-  return JSON.parse(clean_str)
+
+  return JSON.parse(clean_str);
 }
 
-async function getOCR({b64Image, mimeType}: z.infer<typeof AISchema.ocrInput>) {
+async function getOCR({ b64Image, mimeType }: z.infer<typeof AISchema.ocrInput>) {
   try {
     const prompt = generateOCRPrompt();
 
@@ -107,14 +115,14 @@ async function getOCR({b64Image, mimeType}: z.infer<typeof AISchema.ocrInput>) {
       model: 'gemini-2.5-flash',
       contents: [
         {
-          text: prompt
+          text: prompt,
         },
         {
           inlineData: {
             mimeType: mimeType,
             data: b64Image,
           },
-        }
+        },
       ],
       config: {
         tools: [
@@ -126,12 +134,12 @@ async function getOCR({b64Image, mimeType}: z.infer<typeof AISchema.ocrInput>) {
     });
 
     if (!response || !response.text) {
-      throw new Error("Invalid response from Gemini")
+      throw new Error('Invalid response from Gemini');
     }
-    console.log("Raw Response", response.text);
+    console.log('Raw Response', response.text);
 
     const cleanedResponse = cleanResponse(response.text);
-    console.log("Cleaned Response", cleanedResponse);
+    console.log('Cleaned Response', cleanedResponse);
 
     AISchema.ocrOutput.parse(cleanedResponse); // Throws error if unable to parse, TODO: retry mechanism
     return { data: cleanedResponse, error: null };

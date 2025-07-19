@@ -17,9 +17,9 @@ const AISchema = {
     product_name: z.string().describe('Human-friendly name of the product'),
     product_description: z.string().describe('Brief description of the product'),
     product_price: z.string().describe('Price of the product'),
-    purchase_date: z.string().datetime().describe("Purchase date of the product"), // Cannot use z.iso.date()
-    warranty_duration: z.string().describe("Warranty/subscription duration of the product")
-  })
+    purchase_date: z.string().datetime().describe('Purchase date of the product'), // Cannot use z.iso.date()
+    warranty_duration: z.string().describe('Warranty/subscription duration of the product'),
+  }),
 };
 
 export default AISchema;

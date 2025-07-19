@@ -80,11 +80,11 @@ export default function AddWarranty() {
     });
 
     const json = await res.json();
-    console.log("Backend Response", json)
+    console.log('Backend Response', json);
     if (json['success']) {
-      const jsonData = json["data"] // TODO: Purchase date, description, warranty duration
-      setProductName(jsonData["product_name"])
-      setPurchaseDate(new Date(jsonData["purchase_date"]))
+      const jsonData = json['data']; // TODO: Purchase date, description, warranty duration
+      setProductName(jsonData['product_name']);
+      setPurchaseDate(new Date(jsonData['purchase_date']));
       showMessage({
         type: 'success',
         message: 'Successfully fetched AI OCR!',
@@ -97,7 +97,7 @@ export default function AddWarranty() {
     }
     setOcrLoading(false);
     closeOCRPopup();
-  }
+  };
 
   const handleSubmitButton = async () => {
     if (submitLoading) return; // Just in case

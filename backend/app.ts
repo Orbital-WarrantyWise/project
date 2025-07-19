@@ -8,7 +8,7 @@ const app = express();
 const port = 8000;
 
 app.use(cors({ origin: process.env.FRONTEND_BASE_URL })); // Prevent CORS errors
-app.use(express.json({limit: '10mb'})); // Ensure req recieved is in json, increase max size of request body to 10MB, TODO: make this per-route
+app.use(express.json({ limit: '10mb' })); // Ensure req recieved is in json, increase max size of request body to 10MB, TODO: make this per-route
 
 app.use('/ai', authRequired, AIRouter);
 
