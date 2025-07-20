@@ -10,6 +10,7 @@ import { decode } from 'base64-arraybuffer';
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
 export default function AddWarranty() {
+  // TODO: Handle organisationId in search params
   const [productName, setProductName] = useState('');
   const [productCategories, setProductCategories] = useState('');
   const [openPurchaseDatePicker, setOpenPurchaseDatePicker] = useState(false);
@@ -53,7 +54,7 @@ export default function AddWarranty() {
       product_categories: productCategories.split(','), // TODO: Also handle whitespaces
       purchase_date: formatDate(purchaseDate),
       expiration_date: formatDate(expirationDate),
-      user_id: (await supabase.auth.getUser()).data.user?.id,
+      user_id: (await supabase.auth.getUser()).data.user!.id,
     };
     console.log('Form Data is', data);
     const { data: warranty, error } = await supabase.from('warranties').insert(data).select().single();
