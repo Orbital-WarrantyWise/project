@@ -1,5 +1,5 @@
 import { supabase } from '@/helpers/supabase';
-import type { Warranty } from '@/helpers/types';
+import type { Tables } from 'warrantywise-database/database.types';
 import React, { useEffect, useState } from 'react';
 import { View, TextInput, Text, FlatList, StyleSheet } from 'react-native';
 import { showMessage } from 'react-native-flash-message';
@@ -16,7 +16,7 @@ const TABLE_HEADERS = [
 export default function WarrantySearchPage() {
   // TODO: Add debouncing for nameQuery
   const [nameQuery, setNameQuery] = useState('');
-  const [warranties, setWarranties] = useState<Warranty[]>();
+  const [warranties, setWarranties] = useState<Tables<'warranties'>[]>();
 
   useEffect(() => {
     const search = async () => {

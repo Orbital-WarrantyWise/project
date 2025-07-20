@@ -2,7 +2,7 @@ import { StyleSheet, View, FlatList, Text, Button, Modal, ScrollView } from 'rea
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
-import type { Warranty } from '@/helpers/types';
+import type { Tables } from 'warrantywise-database/database.types';
 import { useRouter } from 'expo-router';
 import Markdown from 'react-native-markdown-display';
 import { supabase } from '@/helpers/supabase';
@@ -15,7 +15,7 @@ const TABLE_HEADERS = [
 ];
 
 export default function GetWarranties() {
-  const [warranties, setWarranties] = useState<Warranty[]>();
+  const [warranties, setWarranties] = useState<Tables<'warranties'>[]>([]);
   const [aiRecommendation, setAiRecommendation] = useState<string>();
   const [showAIRecommendationPopup, setShowAIRecommendationPopup] = useState(false);
   const [aiRecommendationLoading, setAiRecommendationLoading] = useState(false);
@@ -33,7 +33,7 @@ export default function GetWarranties() {
     load();
   }, []);
 
-  const openAIRecommendationPopup = async (item: Warranty) => {
+  const openAIRecommendationPopup = async (item: Tables<'warranties'>) => {
     if (aiRecommendationLoading) return; // Prevents wastage of tokens as well
     const {
       data: { session },
@@ -105,7 +105,7 @@ export default function GetWarranties() {
                     title="Edit"
                     onPress={() => {
                       router.navigate({
-                        pathname: '/warranty/[warrantyId]',
+                        pathname: '/(warranty)/warranties/[warrantyId]',
                         params: { warrantyId: item.id },
                       });
                     }}
