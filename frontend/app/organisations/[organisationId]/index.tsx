@@ -66,13 +66,6 @@ export default function EditWarranty() {
       <Text className="mt-4 font-semibold">Members</Text>
       <FlatList data={orgMembers} keyExtractor={m => m.user_id!} renderItem={({ item }) => <Text>{item.email}</Text>} />
 
-      <Text className="mt-4 font-semibold">Warranties</Text>
-      <FlatList
-        data={warranties}
-        keyExtractor={w => w.id.toString()}
-        renderItem={({ item }) => <Text>{item.product_name}</Text>}
-      />
-
       <Button
         title="Add Members"
         onPress={() =>

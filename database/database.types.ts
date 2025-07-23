@@ -10,51 +10,84 @@ export type Database = {
   // Allows to automatically instanciate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "12.2.12 (cd3cf9e)"
   }
   public: {
     Tables: {
+      _prisma_migrations: {
+        Row: {
+          applied_steps_count: number
+          checksum: string
+          finished_at: string | null
+          id: string
+          logs: string | null
+          migration_name: string
+          rolled_back_at: string | null
+          started_at: string
+        }
+        Insert: {
+          applied_steps_count?: number
+          checksum: string
+          finished_at?: string | null
+          id: string
+          logs?: string | null
+          migration_name: string
+          rolled_back_at?: string | null
+          started_at?: string
+        }
+        Update: {
+          applied_steps_count?: number
+          checksum?: string
+          finished_at?: string | null
+          id?: string
+          logs?: string | null
+          migration_name?: string
+          rolled_back_at?: string | null
+          started_at?: string
+        }
+        Relationships: []
+      }
       organisations: {
         Row: {
           created_at: string
           description: string | null
           id: number
+          is_custom: boolean
           name: string
+          owner_user_id: string
         }
         Insert: {
           created_at?: string
           description?: string | null
           id?: number
+          is_custom?: boolean
           name: string
+          owner_user_id: string
         }
         Update: {
           created_at?: string
           description?: string | null
           id?: number
+          is_custom?: boolean
           name?: string
+          owner_user_id?: string
         }
         Relationships: []
       }
       organisations_on_users: {
         Row: {
-          created_at: string
-          id: number
           organisation_id: number
-          role: Database["public"]["Enums"]["organisation_role"]
+          role: Database["public"]["Enums"]["OrganisationRole"]
           user_id: string
         }
         Insert: {
-          created_at?: string
-          id?: number
           organisation_id: number
-          role?: Database["public"]["Enums"]["organisation_role"]
-          user_id?: string
+          role?: Database["public"]["Enums"]["OrganisationRole"]
+          user_id: string
         }
         Update: {
-          created_at?: string
-          id?: number
           organisation_id?: number
-          role?: Database["public"]["Enums"]["organisation_role"]
+          role?: Database["public"]["Enums"]["OrganisationRole"]
           user_id?: string
         }
         Relationships: [
@@ -67,97 +100,71 @@ export type Database = {
           },
         ]
       }
-      warranties: {
+      users: {
         Row: {
-          created_at: string
-          expiration_date: string
-          id: number
-          product_categories: string[]
-          product_name: string
-          purchase_date: string
-          user_id: string
+          email: string | null
+          id: string
         }
         Insert: {
-          created_at?: string
-          expiration_date: string
-          id?: number
-          product_categories: string[]
-          product_name: string
-          purchase_date: string
-          user_id: string
+          email?: string | null
+          id: string
         }
         Update: {
-          created_at?: string
-          expiration_date?: string
-          id?: number
-          product_categories?: string[]
-          product_name?: string
-          purchase_date?: string
-          user_id?: string
+          email?: string | null
+          id?: string
         }
         Relationships: []
       }
-      warranty_on_organisations: {
+      warranties: {
         Row: {
+          categories: string[] | null
           created_at: string
+          expiration_date: string
           id: number
+          name: string
           organisation_id: number
-          warranty_id: number
+          price: unknown
+          purchased_date: string
         }
         Insert: {
+          categories?: string[] | null
           created_at?: string
+          expiration_date: string
           id?: number
+          name: string
           organisation_id: number
-          warranty_id: number
+          price: unknown
+          purchased_date: string
         }
         Update: {
+          categories?: string[] | null
           created_at?: string
+          expiration_date?: string
           id?: number
+          name?: string
           organisation_id?: number
-          warranty_id?: number
+          price?: unknown
+          purchased_date?: string
         }
         Relationships: [
           {
-            foreignKeyName: "warranty_on_organisations_organisation_id_fkey"
+            foreignKeyName: "warranties_organisation_id_fkey"
             columns: ["organisation_id"]
             isOneToOne: false
             referencedRelation: "organisations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "warranty_on_organisations_warranty_id_fkey"
-            columns: ["warranty_id"]
-            isOneToOne: false
-            referencedRelation: "warranties"
             referencedColumns: ["id"]
           },
         ]
       }
     }
     Views: {
-      organisation_members: {
-        Row: {
-          email: string | null
-          organisation_id: number | null
-          raw_user_meta_data: Json | null
-          user_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "organisations_on_users_organisation_id_fkey"
-            columns: ["organisation_id"]
-            isOneToOne: false
-            referencedRelation: "organisations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       [_ in never]: never
     }
     Enums: {
-      organisation_role: "admin" | "member"
+      OrganisationRole: "Owner" | "Admin" | "Viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -285,7 +292,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      organisation_role: ["admin", "member"],
+      OrganisationRole: ["Owner", "Admin", "Viewer"],
     },
   },
 } as const

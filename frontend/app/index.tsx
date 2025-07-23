@@ -46,6 +46,10 @@ export default function Index() {
           <View style={styleSheet.buttonViewWrapper}>
             <Button title="Search Warranties" onPress={() => router.navigate('/(warranty)/search')} />
           </View>
+
+          <View style={styleSheet.buttonViewWrapper}>
+            <Button title="List Organisations" onPress={() => router.navigate('/(organisation)/list')} />
+          </View>
         </View>
       ) : (
         <View>

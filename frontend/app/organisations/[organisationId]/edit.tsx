@@ -29,10 +29,13 @@ export default function AddMembers() {
     // TODO: Handle invitation by email
     // For now, assume confirmation and directly add to the table
     const addUser = async () => {
-      supabase.from('organisations_on_users').insert({
-        // TODO: NOT DONE
-        organisation_id: Number.parseInt(organisationId),
-      });
+      const { data } = await supabase.from('profiles').select('id').eq('email', email).maybeSingle();
+      if (data) {
+        await supabase.from('organisations_on_users').insert({
+          organisation_id: Number.parseInt(organisationId),
+          user_id: data.id,
+        });
+      }
     };
     addUser();
   };
