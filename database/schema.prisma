@@ -11,12 +11,12 @@ datasource db {
 enum OrganisationRole {
   Owner
   Admin
-  Viewer
+  Member
 }
 
 // RLS enabled with 2 policies
-// 1. Only the organisation's viewer can select it
-// 2. Only the organisation's admin can modify/delete it
+// 1. Only the organisation's members can select it
+// 2. Only the organisation's admin can insert/modify/delete it
 model Warranty {
   id             Int          @id @default(autoincrement())
   name           String
@@ -62,12 +62,13 @@ model Organisation {
 }
 
 // RLS enabled with 0 policies - so no one can query it
+// Create database trigger to create OrganisationsOnUsers when creating new organisation
 model OrganisationsOnUsers {
   user           User             @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   userId         String           @map("user_id") @db.Uuid
   organisation   Organisation     @relation(fields: [organisationId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   organisationId Int              @map("organisation_id")
-  role           OrganisationRole @default(Viewer)
+  role           OrganisationRole @default(Member)
 
   @@id([userId, organisationId])
   @@map("organisations_on_users")

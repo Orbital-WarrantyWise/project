@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "OrganisationRole" AS ENUM ('Owner', 'Admin', 'Viewer');
+CREATE TYPE "OrganisationRole" AS ENUM ('Owner', 'Admin', 'Member');
 
 -- CreateTable
 CREATE TABLE "warranties" (
@@ -39,7 +39,7 @@ CREATE TABLE "organisations" (
 CREATE TABLE "organisations_on_users" (
     "user_id" UUID NOT NULL,
     "organisation_id" INTEGER NOT NULL,
-    "role" "OrganisationRole" NOT NULL DEFAULT 'Viewer',
+    "role" "OrganisationRole" NOT NULL DEFAULT 'Member',
 
     CONSTRAINT "organisations_on_users_pkey" PRIMARY KEY ("user_id","organisation_id")
 );
