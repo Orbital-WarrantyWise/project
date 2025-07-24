@@ -7,7 +7,7 @@ CREATE TABLE "warranties" (
     "name" TEXT NOT NULL,
     "categories" TEXT[],
     "price" MONEY NOT NULL,
-    "purchased_date" TIMESTAMP(3) NOT NULL,
+    "purchase_date" TIMESTAMP(3) NOT NULL,
     "expiration_date" TIMESTAMP(3) NOT NULL,
     "organisation_id" INTEGER NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

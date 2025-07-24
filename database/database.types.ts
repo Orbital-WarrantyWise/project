@@ -102,16 +102,19 @@ export type Database = {
       }
       users: {
         Row: {
-          email: string | null
-          id: string
+          email: string
+          id: number
+          user_id: string
         }
         Insert: {
-          email?: string | null
-          id: string
+          email: string
+          id?: number
+          user_id: string
         }
         Update: {
-          email?: string | null
-          id?: string
+          email?: string
+          id?: number
+          user_id?: string
         }
         Relationships: []
       }
@@ -124,7 +127,7 @@ export type Database = {
           name: string
           organisation_id: number
           price: unknown
-          purchased_date: string
+          purchase_date: string
         }
         Insert: {
           categories?: string[] | null
@@ -134,7 +137,7 @@ export type Database = {
           name: string
           organisation_id: number
           price: unknown
-          purchased_date: string
+          purchase_date: string
         }
         Update: {
           categories?: string[] | null
@@ -144,7 +147,7 @@ export type Database = {
           name?: string
           organisation_id?: number
           price?: unknown
-          purchased_date?: string
+          purchase_date?: string
         }
         Relationships: [
           {

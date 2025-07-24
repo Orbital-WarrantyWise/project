@@ -22,7 +22,7 @@ model Warranty {
   name           String
   categories     String[]
   price          Decimal      @db.Money
-  purchaseDate   DateTime     @map("purchased_date")
+  purchaseDate   DateTime     @map("purchase_date")
   expirationDate DateTime     @map("expiration_date")
   organisation   Organisation @relation(fields: [organisationId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   organisationId Int          @map("organisation_id")
