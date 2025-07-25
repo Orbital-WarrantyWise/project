@@ -74,7 +74,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "organisations_owner_user_id_fkey1"
+            foreignKeyName: "organisations_owner_user_id_fkey"
             columns: ["owner_user_id"]
             isOneToOne: false
             referencedRelation: "users"
@@ -107,7 +107,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "organisations_on_users_user_id_fkey1"
+            foreignKeyName: "organisations_on_users_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
@@ -176,7 +176,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_my_organisation_ids: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          organisation_id: number
+        }[]
+      }
     }
     Enums: {
       OrganisationRole: "Owner" | "Admin" | "Member"

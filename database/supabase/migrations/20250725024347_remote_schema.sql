@@ -1,20 +1,3 @@
-
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET transaction_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
-
-
-
-
 ALTER SCHEMA "public" OWNER TO "postgres";
 
 
@@ -61,57 +44,6 @@ CREATE TYPE "public"."OrganisationRole" AS ENUM (
 
 
 ALTER TYPE "public"."OrganisationRole" OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."create_custom_organisation"() RETURNS "trigger"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    SET "search_path" TO ''
-    AS $$
-BEGIN
-  INSERT INTO public.organisations_on_users (user_id, organisation_id, role)
-  VALUES (new.owner_user_id, new.id, 'Owner');
-
-  RETURN new;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."create_custom_organisation"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."create_user_organisation"() RETURNS "trigger"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    SET "search_path" TO ''
-    AS $$
-DECLARE
-  new_organisation_id BIGINT;
-BEGIN
-  INSERT INTO public.organisations (name, owner_user_id)
-  VALUES ('My Organisation', new.id)
-  RETURNING id into new_organisation_id;
-
-  INSERT INTO public.users (user_id, email)
-  VALUES (new.id, new.email);
-
-  new."raw_user_meta_data" := (coalesce(new."raw_user_meta_data", '{}')::jsonb || 
-    jsonb_build_object('default_organisation', new_organisation_id));
-
-  RETURN new;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."create_user_organisation"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."get_my_organisation_ids"() RETURNS TABLE("organisation_id" integer)
-    LANGUAGE "sql" SECURITY DEFINER
-    AS $$
-  SELECT organisation_id FROM organisations_on_users WHERE user_id = (SELECT auth.uid());
-$$;
-
-
-ALTER FUNCTION "public"."get_my_organisation_ids"() OWNER TO "postgres";
 
 SET default_tablespace = '';
 
@@ -245,6 +177,58 @@ ALTER TABLE ONLY "public"."warranties"
 
 
 
+CREATE OR REPLACE FUNCTION "public"."create_custom_organisation"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO ''
+    AS $$
+BEGIN
+  INSERT INTO public.organisations_on_users (user_id, organisation_id, role)
+  VALUES (new.owner_user_id, new.id, 'Owner');
+
+  RETURN new;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."create_custom_organisation"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."create_user_organisation"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO ''
+    AS $$
+DECLARE
+  new_organisation_id BIGINT;
+BEGIN
+  INSERT INTO public.organisations (name, owner_user_id)
+  VALUES ('My Organisation', new.id)
+  RETURNING id into new_organisation_id;
+
+  INSERT INTO public.users (user_id, email)
+  VALUES (new.id, new.email);
+
+  new."raw_user_meta_data" := (coalesce(new."raw_user_meta_data", '{}')::jsonb || 
+    jsonb_build_object('default_organisation', new_organisation_id));
+
+  RETURN new;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."create_user_organisation"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."get_my_organisation_ids"() RETURNS TABLE("organisation_id" integer)
+    LANGUAGE "sql" SECURITY DEFINER
+    AS $$
+  SELECT organisation_id FROM organisations_on_users WHERE user_id = (SELECT auth.uid());
+$$;
+
+
+ALTER FUNCTION "public"."get_my_organisation_ids"() OWNER TO "postgres";
+
+
+
 CREATE INDEX "organisations_on_users_user_id_organisation_id_idx" ON "public"."organisations_on_users" USING "btree" ("user_id", "organisation_id");
 
 
@@ -268,7 +252,7 @@ ALTER TABLE ONLY "public"."organisations_on_users"
 
 
 ALTER TABLE ONLY "public"."organisations"
-    ADD CONSTRAINT "organisations_owner_user_id_fkey1" FOREIGN KEY ("owner_user_id") REFERENCES "public"."users"("user_id") ON UPDATE CASCADE ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+    ADD CONSTRAINT "organisations_owner_user_id_fkey" FOREIGN KEY ("owner_user_id") REFERENCES "public"."users"("user_id") ON UPDATE CASCADE ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 
 
 

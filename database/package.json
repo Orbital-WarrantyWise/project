@@ -2,11 +2,10 @@
   "name": "warrantywise-database",
   "scripts": {
     "start": "supabase start",
-    "gen:types": "supabase gen types typescript --local > database.types.ts",
-    "postinstall": "prisma generate"
+    "gen:types": "supabase gen types typescript --local --schema public > database.types.ts"
   },
   "devDependencies": {
-    "supabase": "^2.26.9"
+    "supabase": "^2.31.8"
   },
   "dependencies": {
     "prisma": "^6.12.0"
