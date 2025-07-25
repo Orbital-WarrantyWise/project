@@ -1,12 +1,9 @@
 import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
-import { useRouter } from 'expo-router';
 import { supabase } from '@/helpers/supabase';
 
-export default function Login() {
-  const router = useRouter();
-
+export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -14,22 +11,20 @@ export default function Login() {
   const handleSubmitButton = async () => {
     if (submitLoading) return; // Just in case
     setSubmitLoading(true);
-    const data = {
-      email: email,
-      password: password,
-    };
-    console.log('Form Data is', data);
-    const res = await supabase.auth.signInWithPassword(data);
+    const res = await supabase.auth.signUp({ email, password });
+
     if (res.error) {
       showMessage({
         type: 'danger',
-        message: `Failed to Login! [${res.error.name}: ${res.error.message}]`,
+        message: `Failed to Register Account! [${res.error.name}: ${res.error.message}]`,
       });
       setSubmitLoading(false);
     } else {
-      showMessage({ type: 'success', message: 'Successful Login!' });
+      showMessage({
+        type: 'success',
+        message: 'Successfully registered, please check your email to confirm your account!',
+      });
       setSubmitLoading(false);
-      router.replace('/main');
     }
   };
 
@@ -62,7 +57,7 @@ export default function Login() {
       />
 
       <View style={styleSheet.submitButtonViewWrapper}>
-        {submitLoading ? <ActivityIndicator size="small" /> : <Button title="Login" onPress={handleSubmitButton} />}
+        {submitLoading ? <ActivityIndicator size="small" /> : <Button title="Register" onPress={handleSubmitButton} />}
       </View>
 
       <FlashMessage position="top" />

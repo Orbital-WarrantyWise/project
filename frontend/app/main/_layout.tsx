@@ -17,5 +17,5 @@ export default function Layout() {
     });
   }, []);
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return <Stack />;
 }

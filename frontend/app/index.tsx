@@ -17,11 +17,11 @@ export default function Index() {
 
       <View>
         <View style={styleSheet.buttonViewWrapper}>
-          <Button title="Register" onPress={() => router.navigate('/register')} />
+          <Button title="Register" onPress={() => router.navigate('/auth/register')} />
         </View>
 
         <View style={styleSheet.buttonViewWrapper}>
-          <Button title="Login" onPress={() => router.navigate('/login')} />
+          <Button title="Login" onPress={() => router.navigate('/auth/login')} />
         </View>
       </View>
     </View>
