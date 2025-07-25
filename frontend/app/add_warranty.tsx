@@ -17,7 +17,8 @@ export default function AddWarranty() {
   const [openExpirationDatePicker, setOpenExpirationDatePicker] = useState(false);
   const [expirationDate, setExpirationDate] = useState(new Date());
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
+  const [fileExt, setFileExt] = useState<string | null>(null);
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [showOCRPopup, setShowOCRPopup] = useState(false);
   const [ocrLoading, setOcrLoading] = useState(false);
 
@@ -27,7 +28,7 @@ export default function AddWarranty() {
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
-    let result = await ImagePicker.launchImageLibraryAsync({
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
       quality: 1,
@@ -35,10 +36,61 @@ export default function AddWarranty() {
       base64: true,
     });
 
-    if (!result.canceled) {
-      setImage(result.assets[0]);
-      setShowOCRPopup(true);
+    // Don't do anything if user closes image picker
+    if (result.canceled) return;
+
+    // Ensure image size is less than 5 MB
+    const image = result.assets[0];
+    if (image && image.fileSize && image.fileSize >= MAX_IMAGE_SIZE) {
+      showMessage({ type: 'danger', message: 'Image exceeds 5MB, please use a smaller image!' });
+      return;
     }
+
+    // Upload image to Supabase bucket as temp file
+    const userId = (await supabase.auth.getUser()).data.user?.id;
+    let fileExt;
+    let res;
+    if (Platform.OS === 'web') {
+      fileExt = image.file!.name.split('.').pop();
+      if (!fileExt) {
+        showMessage({ type: 'danger', message: 'Couldn\'t extract file extension from image!' });
+        return;
+      }
+      res = await supabase.storage
+        .from('images')
+        .upload(`${userId}/temp.${fileExt}`, image.file!);
+    } else {
+      fileExt = image.uri.split('.').pop();
+      if (!fileExt) {
+        showMessage({ type: 'danger', message: 'Couldn\'t extract file extension from image!' });
+        return;
+      }
+      res = await supabase.storage
+        .from('images')
+        .upload(
+          `${userId}/temp.${fileExt}`,
+          decode(image.base64!),
+          {
+            contentType: image.mimeType,
+          },
+        );
+    }
+    // TODO: Handle error if uploading to storage fails
+    console.log(res.error);
+
+    // Generate and set signed image url, together with file extension
+    const { data, error } = await supabase.storage
+      .from('images')
+      .createSignedUrl(`${userId}/temp.${fileExt}`, 3600);
+    if (error) {
+      // TODO: Handle error
+      console.log(error);
+    } else {
+      setFileExt(fileExt);
+      setSignedUrl(data.signedUrl);
+    }
+
+    setShowOCRPopup(true);
   };
 
   const closeOCRPopup = () => {
@@ -46,12 +98,8 @@ export default function AddWarranty() {
   };
 
   const handleOCRButton = async () => {
-    if (ocrLoading || !image) return; // Just in case
-    // Ensure image size is less than 5 MB
-    if (image && image.fileSize && image.fileSize >= MAX_IMAGE_SIZE) {
-      showMessage({ type: 'danger', message: 'Image exceeds 5MB, please use a smaller image!' });
-      return;
-    }
+    if (ocrLoading || !signedUrl) return; // Just in case
+    setOcrLoading(true);
 
     const {
       data: { session },
@@ -65,8 +113,6 @@ export default function AddWarranty() {
     }
     const { access_token } = session;
 
-    setOcrLoading(true);
-
     const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/ai/ocr', {
       method: 'POST',
       headers: {
@@ -74,8 +120,7 @@ export default function AddWarranty() {
         SUPABASE_ACCESS_TOKEN: access_token,
       },
       body: JSON.stringify({
-        b64Image: image.base64,
-        mimeType: image.mimeType,
+        imageUrl: signedUrl,
       }),
     });
 
@@ -101,50 +146,38 @@ export default function AddWarranty() {
 
   const handleSubmitButton = async () => {
     if (submitLoading) return; // Just in case
-    // Ensure image size is less than 5 MB
-    if (image && image.fileSize && image.fileSize >= MAX_IMAGE_SIZE) {
-      showMessage({ type: 'danger', message: 'Image exceeds 5MB, please use a smaller image!' });
-      return;
-    }
-
     setSubmitLoading(true);
 
+    // Insert warranty data
+    const userId = (await supabase.auth.getUser()).data.user?.id;
     const data = {
       product_name: productName,
       product_categories: productCategories.split(','), // TODO: Also handle whitespaces
       purchase_date: formatDate(purchaseDate),
       expiration_date: formatDate(expirationDate),
-      user_id: (await supabase.auth.getUser()).data.user?.id,
+      user_id: userId,
     };
     console.log('Form Data is', data);
     const { data: warranty, error } = await supabase.from('warranties').insert(data).select().single();
     if (error) {
-      showMessage({ type: 'danger', message: 'Failed to Add Warranty!' });
-    } else {
-      if (image) {
-        let res;
-        if (Platform.OS === 'web') {
-          const fileExt = image.file!.name.split('.').pop();
-          res = await supabase.storage
-            .from('images')
-            .upload(`${(await supabase.auth.getUser()).data.user?.id}/${warranty.id}.${fileExt}`, image.file!);
-        } else {
-          const fileExt = image.uri.split('.').pop();
-          res = await supabase.storage
-            .from('images')
-            .upload(
-              `${(await supabase.auth.getUser()).data.user?.id}/${warranty.id}.${fileExt}`,
-              decode(image.base64!),
-              {
-                contentType: image.mimeType,
-              },
-            );
-        }
-        // TODO: Handle error if uploading to storage fails
-        console.log(res.error);
-      }
-      showMessage({ type: 'success', message: 'Successfully Added Warranty!' });
+      showMessage({ type: 'danger', message: 'Failed to Insert Warranty!' });
+      setSubmitLoading(false);
+      return;
     }
+    
+    // Move warranty image (if any)
+    if (signedUrl) {
+      const tempPath = `${userId}/temp.${fileExt}`
+      const finalizedPath = `${userId}/${warranty.id}.${fileExt}`
+      const { error: error2 } = await supabase.storage.from('images').move(tempPath, finalizedPath);
+      if (error2) {
+        showMessage({ type: 'danger', message: 'Failed to Move Warranty Image!' });
+        setSubmitLoading(false);
+        return;
+      }
+    }
+
+    showMessage({ type: 'success', message: 'Successfully Added Warranty!' });
     setSubmitLoading(false);
   };
 
@@ -158,7 +191,7 @@ export default function AddWarranty() {
     >
       <Text style={styleSheet.textLabel}>Warranty images:</Text>
       <Button title="Pick an image from camera roll" onPress={pickImage} />
-      {image && <Image source={{ uri: image.uri }} style={styleSheet.image} />}
+      {signedUrl && <Image source={{ uri: signedUrl }} style={styleSheet.image} />}
 
       <Text style={styleSheet.textLabel}>Product Name:</Text>
       <TextInput
