@@ -9,8 +9,7 @@ const AISchema = {
   }),
 
   ocrInput: z.object({
-    b64Image: z.string(),
-    mimeType: z.string(),
+    imageUrl: z.string(),
   }),
 
   ocrOutput: z.object({

@@ -106,8 +106,17 @@ function cleanResponse(input_str: string) {
   return JSON.parse(clean_str);
 }
 
-async function getOCR({ b64Image, mimeType }: z.infer<typeof AISchema.ocrInput>) {
+async function getOCR({ imageUrl }: z.infer<typeof AISchema.ocrInput>) {
   try {
+    // Unfortunately, Gemini doesn't support imageUrl directly, we need to first convert to base64 and get mimeType manually... (refer to https://ai.google.dev/gemini-api/docs/image-understanding?authuser=1#inline-image)
+    const imageResponse = await fetch(imageUrl);
+    const imageArrayBuffer = await imageResponse.arrayBuffer();
+    const base64ImageData = Buffer.from(imageArrayBuffer).toString('base64');
+    const mimeType = imageResponse.headers.get('content-type');
+    if (!mimeType) {
+      throw new Error("Invalid mimeType from imageUrl");
+    }
+
     const prompt = generateOCRPrompt();
 
     // Rather annoyingly, Gemini supports structured output and tool use, but not simultaneously... so I've used a workaround to get it to generate structured output
@@ -120,7 +129,7 @@ async function getOCR({ b64Image, mimeType }: z.infer<typeof AISchema.ocrInput>)
         {
           inlineData: {
             mimeType: mimeType,
-            data: b64Image,
+            data: base64ImageData,
           },
         },
       ],
