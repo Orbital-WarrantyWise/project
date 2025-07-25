@@ -166,7 +166,7 @@ export default function GetWarranties() {
                     title="Edit"
                     onPress={() => {
                       router.navigate({
-                        pathname: '/warranties/[warrantyId]',
+                        pathname: '/main/warranties/[warrantyId]',
                         params: { warrantyId: item.id },
                       });
                     }}

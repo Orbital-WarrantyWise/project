@@ -29,7 +29,7 @@ export default function Login() {
     } else {
       showMessage({ type: 'success', message: 'Successful Login!' });
       setSubmitLoading(false);
-      router.replace('/');
+      router.replace('/main');
     }
   };
 
