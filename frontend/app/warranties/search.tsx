@@ -4,11 +4,12 @@ import React, { useEffect, useState } from 'react';
 import { View, TextInput, Text, FlatList, StyleSheet } from 'react-native';
 import { showMessage } from 'react-native-flash-message';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { dateTimeFormatter } from '@/helpers/utils';
 
 const TABLE_HEADERS = [
-  { key: 'id', label: 'ID' },
-  { key: 'product_name', label: 'Product Name' },
-  { key: 'product_categories', label: 'Product Categories' },
+  { key: 'product_name', label: 'Name' },
+  { key: 'product_categories', label: 'Categories' },
+  { key: 'price', label: 'Price' },
   { key: 'purchase_date', label: 'Purchase Date' },
   { key: 'expiration_date', label: 'Expiry Date' },
 ];
@@ -20,7 +21,7 @@ export default function WarrantySearchPage() {
 
   useEffect(() => {
     const search = async () => {
-      const { data, error } = await supabase.from('warranties').select().ilike('product_name', `%${nameQuery}%`);
+      const { data, error } = await supabase.from('warranties').select().ilike('name', `%${nameQuery}%`);
       if (error) {
         showMessage({ type: 'danger', message: 'Failed to Search Warranty!' });
       } else {
@@ -55,11 +56,11 @@ export default function WarrantySearchPage() {
             )}
             renderItem={({ item }) => (
               <View style={styleSheet.table_row}>
-                <Text style={styleSheet.table_cell}>{item.id}</Text>
-                <Text style={styleSheet.table_cell}>{item.product_name}</Text>
-                <Text style={styleSheet.table_cell}>{item.product_categories.join(',')}</Text>
-                <Text style={styleSheet.table_cell}>{item.purchase_date}</Text>
-                <Text style={styleSheet.table_cell}>{item.expiration_date}</Text>
+                <Text style={styleSheet.table_cell}>{item.name}</Text>
+                <Text style={styleSheet.table_cell}>{item.categories ? item.categories?.join(',') : ''}</Text>
+                <Text style={styleSheet.table_cell}>{item.price as string}</Text>
+                <Text style={styleSheet.table_cell}>{dateTimeFormatter.format(new Date(item.purchase_date))}</Text>
+                <Text style={styleSheet.table_cell}>{dateTimeFormatter.format(new Date(item.expiration_date))}</Text>
               </View>
             )}
             keyExtractor={item => item.id.toString()}

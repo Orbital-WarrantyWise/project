@@ -6,10 +6,12 @@ import type { Tables } from 'warrantywise-database/database.types';
 import { useRouter } from 'expo-router';
 import Markdown from 'react-native-markdown-display';
 import { supabase } from '@/helpers/supabase';
+import { dateTimeFormatter } from '@/helpers/utils';
 
 const TABLE_HEADERS = [
-  { key: 'product_name', label: 'Product Name' },
-  { key: 'product_categories', label: 'Product Categories' },
+  { key: 'product_name', label: 'Name' },
+  { key: 'product_categories', label: 'Categories' },
+  { key: 'price', label: 'Price' },
   { key: 'purchase_date', label: 'Purchase Date' },
   { key: 'expiration_date', label: 'Expiry Date' },
 ];
@@ -59,9 +61,9 @@ export default function GetWarranties() {
         SUPABASE_ACCESS_TOKEN: access_token,
       },
       body: JSON.stringify({
-        product_name: item.product_name,
+        product_name: item.name,
         product_description: '', // TODO: Add this field to Warranty schema
-        product_categories: item.product_categories,
+        product_categories: item.categories,
         purchase_date: item.purchase_date,
       }),
     });
@@ -96,16 +98,17 @@ export default function GetWarranties() {
             )}
             renderItem={({ item }) => (
               <View style={styleSheet.table_row}>
-                <Text style={styleSheet.table_cell}>{item.product_name}</Text>
-                <Text style={styleSheet.table_cell}>{item.product_categories.join(',')}</Text>
-                <Text style={styleSheet.table_cell}>{item.purchase_date}</Text>
-                <Text style={styleSheet.table_cell}>{item.expiration_date}</Text>
+                <Text style={styleSheet.table_cell}>{item.name}</Text>
+                <Text style={styleSheet.table_cell}>{item.categories ? item.categories?.join(',') : ''}</Text>
+                <Text style={styleSheet.table_cell}>{item.price as string}</Text>
+                <Text style={styleSheet.table_cell}>{dateTimeFormatter.format(new Date(item.purchase_date))}</Text>
+                <Text style={styleSheet.table_cell}>{dateTimeFormatter.format(new Date(item.expiration_date))}</Text>
                 <View>
                   <Button
                     title="Edit"
                     onPress={() => {
                       router.navigate({
-                        pathname: '/(warranty)/warranties/[warrantyId]',
+                        pathname: '/warranties/[warrantyId]',
                         params: { warrantyId: item.id },
                       });
                     }}

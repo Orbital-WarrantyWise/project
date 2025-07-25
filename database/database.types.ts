@@ -62,7 +62,7 @@ export type Database = {
           id?: number
           is_custom?: boolean
           name: string
-          owner_user_id: string
+          owner_user_id?: string
         }
         Update: {
           created_at?: string
@@ -72,7 +72,15 @@ export type Database = {
           name?: string
           owner_user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "organisations_owner_user_id_fkey1"
+            columns: ["owner_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       organisations_on_users: {
         Row: {
@@ -83,7 +91,7 @@ export type Database = {
         Insert: {
           organisation_id: number
           role?: Database["public"]["Enums"]["OrganisationRole"]
-          user_id: string
+          user_id?: string
         }
         Update: {
           organisation_id?: number
@@ -98,22 +106,26 @@ export type Database = {
             referencedRelation: "organisations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "organisations_on_users_user_id_fkey1"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       users: {
         Row: {
           email: string
-          id: number
           user_id: string
         }
         Insert: {
           email: string
-          id?: number
           user_id: string
         }
         Update: {
           email?: string
-          id?: number
           user_id?: string
         }
         Relationships: []

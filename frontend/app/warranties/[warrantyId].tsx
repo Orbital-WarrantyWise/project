@@ -13,6 +13,7 @@ export default function EditWarranty() {
 
   const [productName, setProductName] = useState('');
   const [productCategories, setProductCategories] = useState('');
+  const [price, setPrice] = useState('');
   const [openPurchaseDatePicker, setOpenPurchaseDatePicker] = useState(false);
   const [purchaseDate, setPurchaseDate] = useState(new Date());
   const [openExpirationDatePicker, setOpenExpirationDatePicker] = useState(false);
@@ -67,8 +68,9 @@ export default function EditWarranty() {
         return;
       }
 
-      setProductName(data.product_name);
-      setProductCategories(data.product_categories.join(','));
+      setProductName(data.name);
+      setProductCategories(data.categories ? data.categories.join(',') : '');
+      setPrice(parseFloat((data.price as string).substring(1)).toString());
       setPurchaseDate(new Date(data.purchase_date));
       setExpirationDate(new Date(data.expiration_date));
       setSubmitLoading(false);
@@ -96,10 +98,12 @@ export default function EditWarranty() {
 
     setSubmitLoading(true);
     const data = {
-      product_name: productName,
-      product_categories: productCategories.split(','), // TODO: Also handle whitespaces
+      name: productName,
+      categories: productCategories.split(','), // TODO: Also handle whitespaces
       purchase_date: formatDate(purchaseDate),
       expiration_date: formatDate(expirationDate),
+      organisation_id: (await supabase.auth.getUser()).data.user!.user_metadata.default_organisation as number,
+      price: Number.parseInt(price),
     };
     const { error } = await supabase.from('warranties').update(data).eq('id', Number.parseInt(params.warrantyId));
 
@@ -147,10 +151,8 @@ export default function EditWarranty() {
       }}
     >
       <Button title="Pick an image from camera roll" onPress={pickImage} />
-      {signedUrl ? (
+      {signedUrl && (
         <Image style={{ width: 80, height: 80 }} source={{ uri: image?.uri || signedUrl }} onError={console.log} />
-      ) : (
-        <View style={{ width: 80, height: 80, backgroundColor: '#1A1A1A' }} />
       )}
 
       <Text style={styleSheet.textLabel}>Product Name:</Text>
@@ -168,6 +170,16 @@ export default function EditWarranty() {
         value={productCategories}
         onChangeText={setProductCategories}
         placeholder="Electronics,Software"
+        placeholderTextColor="#808080"
+      />
+
+      <Text style={styleSheet.textLabel}>Price:</Text>
+      <TextInput
+        style={styleSheet.textInput}
+        value={price}
+        onChangeText={text => setPrice(text.replace(/[^0-9.,]/g, ''))}
+        keyboardType="numeric"
+        placeholder="0"
         placeholderTextColor="#808080"
       />
 

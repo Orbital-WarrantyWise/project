@@ -36,19 +36,19 @@ export default function Index() {
           </View>
 
           <View style={styleSheet.buttonViewWrapper}>
-            <Button title="New Warranty" onPress={() => router.navigate('/(warranty)/new')} />
+            <Button title="New Warranty" onPress={() => router.navigate('/warranties/new')} />
           </View>
 
           <View style={styleSheet.buttonViewWrapper}>
-            <Button title="List Warranties" onPress={() => router.navigate('/(warranty)/list')} />
+            <Button title="List Warranties" onPress={() => router.navigate('/warranties/list')} />
           </View>
 
           <View style={styleSheet.buttonViewWrapper}>
-            <Button title="Search Warranties" onPress={() => router.navigate('/(warranty)/search')} />
+            <Button title="Search Warranties" onPress={() => router.navigate('/warranties/search')} />
           </View>
 
           <View style={styleSheet.buttonViewWrapper}>
-            <Button title="List Organisations" onPress={() => router.navigate('/(organisation)/list')} />
+            <Button title="List Organisations" onPress={() => router.navigate('/organisations/list')} />
           </View>
         </View>
       ) : (

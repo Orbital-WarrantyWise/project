@@ -13,6 +13,7 @@ export default function AddWarranty() {
   // TODO: Handle organisationId in search params
   const [productName, setProductName] = useState('');
   const [productCategories, setProductCategories] = useState('');
+  const [price, setPrice] = useState('');
   const [openPurchaseDatePicker, setOpenPurchaseDatePicker] = useState(false);
   const [purchaseDate, setPurchaseDate] = useState(new Date());
   const [openExpirationDatePicker, setOpenExpirationDatePicker] = useState(false);
@@ -49,12 +50,17 @@ export default function AddWarranty() {
 
     setSubmitLoading(true);
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     const data = {
-      product_name: productName,
-      product_categories: productCategories.split(','), // TODO: Also handle whitespaces
+      name: productName,
+      categories: productCategories.split(','), // TODO: Also handle whitespaces
       purchase_date: formatDate(purchaseDate),
       expiration_date: formatDate(expirationDate),
-      user_id: (await supabase.auth.getUser()).data.user!.id,
+      organisation_id: user!.user_metadata.default_organisation as number,
+      price: Number.parseInt(price),
     };
     console.log('Form Data is', data);
     const { data: warranty, error } = await supabase.from('warranties').insert(data).select().single();
@@ -84,6 +90,7 @@ export default function AddWarranty() {
         console.log(res.error);
       }
       showMessage({ type: 'success', message: 'Successfully Added Warranty!' });
+      // TODO: Redirect to main page
     }
     setSubmitLoading(false);
   };
@@ -100,7 +107,7 @@ export default function AddWarranty() {
       <Button title="Pick an image from camera roll" onPress={pickImage} />
       {image && <Image source={{ uri: image.uri }} style={styleSheet.image} />}
 
-      <Text style={styleSheet.textLabel}>Product Name:</Text>
+      <Text style={styleSheet.textLabel}>Name:</Text>
       <TextInput
         style={styleSheet.textInput}
         value={productName}
@@ -109,12 +116,22 @@ export default function AddWarranty() {
         placeholderTextColor="#808080"
       />
 
-      <Text style={styleSheet.textLabel}>Product Categories (Comma-Separated):</Text>
+      <Text style={styleSheet.textLabel}>Categories (Comma-Separated):</Text>
       <TextInput
         style={styleSheet.textInput}
         value={productCategories}
         onChangeText={setProductCategories}
         placeholder="Electronics,Software"
+        placeholderTextColor="#808080"
+      />
+
+      <Text style={styleSheet.textLabel}>Price:</Text>
+      <TextInput
+        style={styleSheet.textInput}
+        value={price}
+        onChangeText={text => setPrice(text.replace(/[^0-9.,]/g, ''))}
+        keyboardType="numeric"
+        placeholder="0"
         placeholderTextColor="#808080"
       />
 

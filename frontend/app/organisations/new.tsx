@@ -1,10 +1,8 @@
-import { View, Text, TextInput, Button, Alert } from 'react-native';
+import { StyleSheet, View, Text, TextInput, Button, Alert, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
 import { supabase } from '@/helpers/supabase';
 
 export default function CreateOrganizationScreen() {
-  const navigation = useNavigation();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,7 +15,7 @@ export default function CreateOrganizationScreen() {
 
     setLoading(true);
 
-    const { error } = await supabase.from('organisations').insert({ name, description });
+    const { error } = await supabase.from('organisations').insert({ name, description, is_custom: true });
 
     setLoading(false);
 
@@ -26,32 +24,53 @@ export default function CreateOrganizationScreen() {
       Alert.alert('Error', error.message);
     } else {
       Alert.alert('Success', 'Organization created!');
-      navigation.goBack(); // or navigate to details screen
+      // TODO: Navigate to organisation's page instead
     }
   };
 
   return (
-    <View className="flex-1 p-4 bg-white">
-      <Text className="text-2xl font-semibold mb-4">Create Organization</Text>
-
-      <Text className="mb-1 text-gray-700">Name</Text>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <Text style={styleSheet.textLabel}>Name</Text>
       <TextInput
         value={name}
         onChangeText={setName}
         placeholder="e.g. My Company"
-        className="border border-gray-300 rounded-md px-3 py-2 mb-4"
+        style={styleSheet.textInput}
+        placeholderTextColor="#808080"
       />
 
-      <Text className="mb-1 text-gray-700">Description (optional)</Text>
+      <Text style={styleSheet.textLabel}>Description (optional)</Text>
       <TextInput
         value={description}
         onChangeText={setDescription}
         placeholder="Short description"
         multiline
-        className="border border-gray-300 rounded-md px-3 py-2 mb-6 h-24"
+        style={styleSheet.textInput}
+        placeholderTextColor="#808080"
       />
 
-      <Button title={loading ? 'Creating...' : 'Create'} onPress={handleCreate} disabled={loading} />
+      <View style={styleSheet.submitButtonViewWrapper}>
+        {loading ? <ActivityIndicator size="small" /> : <Button title="Create" onPress={handleCreate} />}
+      </View>
     </View>
   );
 }
+
+const styleSheet = StyleSheet.create({
+  textLabel: {
+    marginBottom: 5,
+  },
+  textInput: {
+    marginBottom: 15,
+    borderWidth: 1,
+  },
+  submitButtonViewWrapper: {
+    marginTop: 15,
+  },
+});
