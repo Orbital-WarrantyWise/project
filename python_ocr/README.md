@@ -23,3 +23,23 @@ pip install -r requirements.txt
 ```bash
 python app.py
 ```
+
+## Vercel
+
+1. Install Vercel
+
+```bash
+pnpm i -g vercel
+```
+
+2. Login to Vercel
+
+```bash
+vercel login
+```
+
+3. Deploy to Production on Vercel (feel free to use all default settings)
+
+```bash
+vercel --prod
+```
