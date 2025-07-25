@@ -40,7 +40,7 @@ jobs:
       - name: Verify generated types
         run: |
           pnpm run gen:types
-          if ! git diff --ignore-space-at-eol --exit-code --quiet $TYPES_PATH; then
+          if ! git diff --ignore-space-at-eol --exit-code --quiet database.types.ts; then
             echo "Detected uncommitted changes after build. Run genTypes.sh and commit the result. See status below:"
             git diff
             exit 1
