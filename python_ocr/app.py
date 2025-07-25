@@ -4,6 +4,15 @@ import requests
 import io
 from PIL import Image
 import numpy as np
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route("/parse_image")
+def app_parse_image():
+    image_url = request.get_json()["image_url"]
+    ocr_text = parse_image(image_url)
+    return jsonify({"ocr_text": ocr_text})
 
 def parse_image(image_url: str) -> str:
     # Step 0: Get image from image_url
@@ -64,10 +73,6 @@ def parse_image(image_url: str) -> str:
         reconstructed_lines.append(''.join(reconstructed_line))
     return "\n".join(reconstructed_lines)
 
-def main():
-    image_url = "https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_002.png"
-    ocr_text = parse_image(image_url)
-    print(ocr_text)
-
+# Test URL: "https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_002.png"
 if __name__ == "__main__":
-    main()
+    app.run(host="0.0.0.0", port=8000)
