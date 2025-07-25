@@ -8,7 +8,11 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-@app.route("/parse_image")
+@app.route("/healthcheck")
+def app_healthcheck():
+    return "python_ocr is up!"
+
+@app.route("/parse_image", methods=["POST"])
 def app_parse_image():
     image_url = request.get_json()["image_url"]
     ocr_text = parse_image(image_url)
@@ -75,4 +79,4 @@ def parse_image(image_url: str) -> str:
 
 # Test URL: "https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_002.png"
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000)
+    app.run(host="0.0.0.0", port=8001)
