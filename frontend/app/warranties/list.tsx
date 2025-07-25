@@ -8,13 +8,7 @@ import Markdown from 'react-native-markdown-display';
 import { supabase } from '@/helpers/supabase';
 import { dateTimeFormatter } from '@/helpers/utils';
 
-const TABLE_HEADERS = [
-  { key: 'product_name', label: 'Name' },
-  { key: 'product_categories', label: 'Categories' },
-  { key: 'price', label: 'Price' },
-  { key: 'purchase_date', label: 'Purchase Date' },
-  { key: 'expiration_date', label: 'Expiry Date' },
-];
+const TABLE_HEADERS = ['Name', 'Categories', 'Price', 'Purchase Date', 'Expiry Date'];
 
 export default function GetWarranties() {
   const [warranties, setWarranties] = useState<Tables<'warranties'>[]>([]);
@@ -61,9 +55,9 @@ export default function GetWarranties() {
         SUPABASE_ACCESS_TOKEN: access_token,
       },
       body: JSON.stringify({
-        product_name: item.name,
-        product_description: '', // TODO: Add this field to Warranty schema
-        product_categories: item.categories,
+        name: item.name,
+        description: '', // TODO: Add this field to Warranty schema
+        categories: item.categories,
         purchase_date: item.purchase_date,
       }),
     });
@@ -87,9 +81,9 @@ export default function GetWarranties() {
             data={warranties}
             ListHeaderComponent={() => (
               <View style={styleSheet.table_row}>
-                {TABLE_HEADERS.map(col => (
-                  <Text key={col.key} style={[styleSheet.table_cell, styleSheet.bold_cell]}>
-                    {col.label}
+                {TABLE_HEADERS.map(header => (
+                  <Text key={header} style={[styleSheet.table_cell, styleSheet.bold_cell]}>
+                    {header}
                   </Text>
                 ))}
                 <Text style={[styleSheet.table_cell, styleSheet.bold_cell]}>Edit</Text>

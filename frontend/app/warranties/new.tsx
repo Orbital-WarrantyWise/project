@@ -11,8 +11,8 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
 export default function AddWarranty() {
   // TODO: Handle organisationId in search params
-  const [productName, setProductName] = useState('');
-  const [productCategories, setProductCategories] = useState('');
+  const [name, setName] = useState('');
+  const [categories, setCategories] = useState('');
   const [price, setPrice] = useState('');
   const [openPurchaseDatePicker, setOpenPurchaseDatePicker] = useState(false);
   const [purchaseDate, setPurchaseDate] = useState(new Date());
@@ -55,8 +55,8 @@ export default function AddWarranty() {
     } = await supabase.auth.getUser();
 
     const data = {
-      name: productName,
-      categories: productCategories.split(','), // TODO: Also handle whitespaces
+      name: name,
+      categories: categories.split(','), // TODO: Also handle whitespaces
       purchase_date: formatDate(purchaseDate),
       expiration_date: formatDate(expirationDate),
       organisation_id: user!.user_metadata.default_organisation as number,
@@ -110,8 +110,8 @@ export default function AddWarranty() {
       <Text style={styleSheet.textLabel}>Name:</Text>
       <TextInput
         style={styleSheet.textInput}
-        value={productName}
-        onChangeText={setProductName}
+        value={name}
+        onChangeText={setName}
         placeholder="Laptop"
         placeholderTextColor="#808080"
       />
@@ -119,8 +119,8 @@ export default function AddWarranty() {
       <Text style={styleSheet.textLabel}>Categories (Comma-Separated):</Text>
       <TextInput
         style={styleSheet.textInput}
-        value={productCategories}
-        onChangeText={setProductCategories}
+        value={categories}
+        onChangeText={setCategories}
         placeholder="Electronics,Software"
         placeholderTextColor="#808080"
       />

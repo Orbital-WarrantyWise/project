@@ -11,8 +11,8 @@ import { decode } from 'base64-arraybuffer';
 export default function EditWarranty() {
   const params = useLocalSearchParams<{ warrantyId: string }>();
 
-  const [productName, setProductName] = useState('');
-  const [productCategories, setProductCategories] = useState('');
+  const [name, setName] = useState('');
+  const [categories, setCategories] = useState('');
   const [price, setPrice] = useState('');
   const [openPurchaseDatePicker, setOpenPurchaseDatePicker] = useState(false);
   const [purchaseDate, setPurchaseDate] = useState(new Date());
@@ -68,8 +68,8 @@ export default function EditWarranty() {
         return;
       }
 
-      setProductName(data.name);
-      setProductCategories(data.categories ? data.categories.join(',') : '');
+      setName(data.name);
+      setCategories(data.categories ? data.categories.join(',') : '');
       setPrice(parseFloat((data.price as string).substring(1)).toString());
       setPurchaseDate(new Date(data.purchase_date));
       setExpirationDate(new Date(data.expiration_date));
@@ -98,8 +98,8 @@ export default function EditWarranty() {
 
     setSubmitLoading(true);
     const data = {
-      name: productName,
-      categories: productCategories.split(','), // TODO: Also handle whitespaces
+      name: name,
+      categories: categories.split(','), // TODO: Also handle whitespaces
       purchase_date: formatDate(purchaseDate),
       expiration_date: formatDate(expirationDate),
       organisation_id: (await supabase.auth.getUser()).data.user!.user_metadata.default_organisation as number,
@@ -158,8 +158,8 @@ export default function EditWarranty() {
       <Text style={styleSheet.textLabel}>Product Name:</Text>
       <TextInput
         style={styleSheet.textInput}
-        value={productName}
-        onChangeText={setProductName}
+        value={name}
+        onChangeText={setName}
         placeholder="Laptop"
         placeholderTextColor="#808080"
       />
@@ -167,8 +167,8 @@ export default function EditWarranty() {
       <Text style={styleSheet.textLabel}>Product Categories (Comma-Separated):</Text>
       <TextInput
         style={styleSheet.textInput}
-        value={productCategories}
-        onChangeText={setProductCategories}
+        value={categories}
+        onChangeText={setCategories}
         placeholder="Electronics,Software"
         placeholderTextColor="#808080"
       />

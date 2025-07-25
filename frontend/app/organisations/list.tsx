@@ -1,4 +1,3 @@
-// screens/OrganizationsDashboard.tsx
 import { View, Text, FlatList, Button } from 'react-native';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/helpers/supabase';

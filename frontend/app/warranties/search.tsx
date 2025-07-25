@@ -6,13 +6,7 @@ import { showMessage } from 'react-native-flash-message';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { dateTimeFormatter } from '@/helpers/utils';
 
-const TABLE_HEADERS = [
-  { key: 'product_name', label: 'Name' },
-  { key: 'product_categories', label: 'Categories' },
-  { key: 'price', label: 'Price' },
-  { key: 'purchase_date', label: 'Purchase Date' },
-  { key: 'expiration_date', label: 'Expiry Date' },
-];
+const TABLE_HEADERS = ['Name', 'Categories', 'Price', 'Purchase Date', 'Expiry Date'];
 
 export default function WarrantySearchPage() {
   // TODO: Add debouncing for nameQuery
@@ -47,9 +41,9 @@ export default function WarrantySearchPage() {
             data={warranties}
             ListHeaderComponent={() => (
               <View style={styleSheet.table_row}>
-                {TABLE_HEADERS.map(col => (
-                  <Text key={col.key} style={[styleSheet.table_cell, styleSheet.bold_cell]}>
-                    {col.label}
+                {TABLE_HEADERS.map(header => (
+                  <Text key={header} style={[styleSheet.table_cell, styleSheet.bold_cell]}>
+                    {header}
                   </Text>
                 ))}
               </View>
