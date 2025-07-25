@@ -93,7 +93,7 @@ export default function EditWarranty() {
           title="Edit Organisation"
           onPress={() =>
             router.navigate({
-              pathname: '/organisations/[organisationId]/edit',
+              pathname: '/main/organisations/[organisationId]/edit',
               params: { organisationId },
             })
           }
@@ -105,7 +105,7 @@ export default function EditWarranty() {
           title="Add Members"
           onPress={() =>
             router.navigate({
-              pathname: '/organisations/[organisationId]/add_members',
+              pathname: '/main/organisations/[organisationId]/add_members',
               params: { organisationId },
             })
           }

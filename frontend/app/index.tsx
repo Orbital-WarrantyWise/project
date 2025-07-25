@@ -1,21 +1,7 @@
 import { StyleSheet, Text, View, Image, Button } from 'react-native';
-import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { supabase } from '@/helpers/supabase';
-import type { Session } from '@supabase/supabase-js';
 
 export default function Index() {
-  const [session, setSession] = useState<Session | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-  }, []);
-
   const router = useRouter();
 
   return (
@@ -26,42 +12,18 @@ export default function Index() {
         alignItems: 'center',
       }}
     >
-      <Text style={styleSheet.logoLabel}>WarrantyWise Main Menu</Text>
-      <Image source={require('../assets/images/warrantywise-logo.png')} />
+      <Text style={styleSheet.logoLabel}>WarrantyWise</Text>
+      <Image source={require('@/assets/images/warrantywise-logo.png')} />
 
-      {session ? (
-        <View>
-          <View style={styleSheet.buttonViewWrapper}>
-            <Button title="Logout" onPress={() => supabase.auth.signOut()} />
-          </View>
-
-          <View style={styleSheet.buttonViewWrapper}>
-            <Button title="New Warranty" onPress={() => router.navigate('/warranties/new')} />
-          </View>
-
-          <View style={styleSheet.buttonViewWrapper}>
-            <Button title="List Warranties" onPress={() => router.navigate('/warranties/list')} />
-          </View>
-
-          <View style={styleSheet.buttonViewWrapper}>
-            <Button title="Search Warranties" onPress={() => router.navigate('/warranties/search')} />
-          </View>
-
-          <View style={styleSheet.buttonViewWrapper}>
-            <Button title="List Organisations" onPress={() => router.navigate('/organisations/list')} />
-          </View>
+      <View>
+        <View style={styleSheet.buttonViewWrapper}>
+          <Button title="Register" onPress={() => router.navigate('/register')} />
         </View>
-      ) : (
-        <View>
-          <View style={styleSheet.buttonViewWrapper}>
-            <Button title="Register" onPress={() => router.navigate('/register')} />
-          </View>
 
-          <View style={styleSheet.buttonViewWrapper}>
-            <Button title="Login" onPress={() => router.navigate('/login')} />
-          </View>
+        <View style={styleSheet.buttonViewWrapper}>
+          <Button title="Login" onPress={() => router.navigate('/login')} />
         </View>
-      )}
+      </View>
     </View>
   );
 }

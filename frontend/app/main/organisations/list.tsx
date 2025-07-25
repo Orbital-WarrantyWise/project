@@ -32,14 +32,14 @@ export default function OrganizationsDashboard() {
             title={organisation.name}
             onPress={() =>
               router.navigate({
-                pathname: '/organisations/[organisationId]',
+                pathname: '/main/organisations/[organisationId]',
                 params: { organisationId: organisation.id },
               })
             }
           />
         )}
       />
-      <Button title="Create New Organization" onPress={() => router.navigate('/organisations/new')} />
+      <Button title="Create New Organization" onPress={() => router.navigate('/main/organisations/new')} />
     </View>
   );
 }
