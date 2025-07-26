@@ -1,4 +1,15 @@
-import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator, Image, Platform, Modal, ScrollView } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  Button,
+  ActivityIndicator,
+  Image,
+  Platform,
+  Modal,
+  ScrollView,
+} from 'react-native';
 import { useState } from 'react';
 import { DatePickerModal } from 'react-native-paper-dates'; // Tried https://github.com/react-native-datetimepicker/datetimepicker and https://github.com/mmazzarolo/react-native-modal-datetime-picker, but both don't work on Web
 import { format } from 'date-fns';
@@ -132,13 +143,13 @@ export default function AddWarranty() {
     if (json['success']) {
       // Fields will only be replaced if AI OCR has managed to extract it, otherwise, the user's current values (if any) will be retained
       const jsonData = json['data'];
-      if (jsonData["product_name"]) {
+      if (jsonData['product_name']) {
         setName(jsonData['product_name']);
       }
-      if (jsonData["product_description"]) {
+      if (jsonData['product_description']) {
         setDescription(jsonData['product_description']);
       }
-      if (jsonData["product_price"]) {
+      if (jsonData['product_price']) {
         setPrice(jsonData['product_price']);
       }
       if (jsonData['purchase_date']) {

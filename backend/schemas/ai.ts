@@ -1,9 +1,9 @@
 import { z } from 'zod/v4';
 
 const NullableDatetime = z.union([
-  z.literal(""),
-  z.string().datetime(),  // Cannot use z.iso.date()
-])
+  z.literal(''),
+  z.string().datetime(), // Cannot use z.iso.date()
+]);
 
 const AISchema = {
   recommendation: z.object({
