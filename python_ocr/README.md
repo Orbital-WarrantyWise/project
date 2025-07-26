@@ -2,23 +2,25 @@
 
 ## Local
 
-1. Setup virtual environment
+1. Install Python 3.12 (since Vercel uses Python 3.12 only)
+
+2. Setup virtual environment
 
 ```
 python -m venv warrantywise_venv
 ```
 
-2. Activate virtual environment
+3. Activate virtual environment
 - Windows: `warrantywise_venv\Scripts\Activate.ps1`
 - Unix: `source warrantywise_venv/bin/activate`
 
-3. Install dependencies
+4. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Run Python OCR flask app
+5. Run Python OCR flask app
 
 ```bash
 python app.py

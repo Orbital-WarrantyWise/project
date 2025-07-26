@@ -27,23 +27,24 @@ def parse_image(image_url: str) -> str:
     paddleOCR = PaddleOCR()
     rawOCR = paddleOCR.ocr(img)
     cleaned_bbs = []
-    for entry in rawOCR:
-        # Step 1a: For each bounding box, extract the min/max x/y coordinates and text
-        [[x1, y1], [x2, y2], [x3, y3], [x4, y4]], (text, confidence) = entry  # Parse each entry
-        # print("Received", x1, y1, x2, y2, x3, y3, x4, y4, text, confidence)
-        # Note: Can't do min/max of only 2 points, since the bounding box may not be rectangular (e.g. parallelogram) 
-        cleaned_bb = {
-            "x_min": min(x1, x2, x3, x4),
-            "x_max": max(x1, x2, x3, x4),
-            "y_min": min(y1, y2, y3, y4),
-            "y_max": max(y1, y2, y3, y4),
-            "text": text,
-        }
+    for page in rawOCR:
+        for entry in page:
+            # Step 1a: For each bounding box, extract the min/max x/y coordinates and text
+            [[x1, y1], [x2, y2], [x3, y3], [x4, y4]], (text, confidence) = entry  # Parse each entry
+            # print("Received", x1, y1, x2, y2, x3, y3, x4, y4, text, confidence)
+            # Note: Can't do min/max of only 2 points, since the bounding box may not be rectangular (e.g. parallelogram) 
+            cleaned_bb = {
+                "x_min": min(x1, x2, x3, x4),
+                "x_max": max(x1, x2, x3, x4),
+                "y_min": min(y1, y2, y3, y4),
+                "y_max": max(y1, y2, y3, y4),
+                "text": text,
+            }
 
-        # Step 1b: Compute the bounding box's character width
-        cleaned_bb["char_width"] = (cleaned_bb["x_max"] - cleaned_bb["x_min"]) / len(cleaned_bb["text"])
+            # Step 1b: Compute the bounding box's character width
+            cleaned_bb["char_width"] = (cleaned_bb["x_max"] - cleaned_bb["x_min"]) / len(cleaned_bb["text"])
 
-        cleaned_bbs.append(cleaned_bb)
+            cleaned_bbs.append(cleaned_bb)
 
     # Step 2: Group cleaned bounding boxes into lines
     lines = []
