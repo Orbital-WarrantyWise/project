@@ -111,7 +111,7 @@ export default function EditWarranty() {
     const { error } = await supabase.from('warranties').update(data).eq('id', Number.parseInt(params.warrantyId));
 
     if (error) {
-      showMessage({ type: 'danger', message: 'Failed to Edit Warranty!' });
+      showMessage({ type: 'danger', message: `Failed to Edit Warranty! [${error.name}: ${error.message}]` });
     } else {
       if (image) {
         let res;

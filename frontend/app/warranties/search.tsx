@@ -17,7 +17,7 @@ export default function WarrantySearchPage() {
     const search = async () => {
       const { data, error } = await supabase.from('warranties').select().ilike('name', `%${nameQuery}%`);
       if (error) {
-        showMessage({ type: 'danger', message: 'Failed to Search Warranty!' });
+        showMessage({ type: 'danger', message: `Failed to Search Warranty! [${error.name}: ${error.message}]` });
       } else {
         setWarranties(data);
       }

@@ -70,14 +70,16 @@ export default function AddWarranty() {
         contentType: image.mimeType,
       });
     }
-    // TODO: Handle error if uploading to storage fails
-    console.log(res.error);
+    if (res.error) {
+      showMessage({ type: 'danger', message: `Failed to upload image! [${res.error.name}: ${res.error.message}]` });
+      return;
+    }
 
     // Generate and set signed image url, together with file extension
     const { data, error } = await supabase.storage.from('images').createSignedUrl(`${userId}/temp.${fileExt}`, 3600);
     if (error) {
-      // TODO: Handle error
-      console.log(error);
+      showMessage({ type: 'danger', message: `Failed to move temp image! [${error.name}: ${error.message}]` });
+      return;
     } else {
       setFileExt(fileExt);
       setSignedUrl(data.signedUrl);
@@ -179,7 +181,7 @@ export default function AddWarranty() {
     console.log('Form Data is', data);
     const { data: warranty, error } = await supabase.from('warranties').insert(data).select().single();
     if (error) {
-      showMessage({ type: 'danger', message: 'Failed to Insert Warranty!' });
+      showMessage({ type: 'danger', message: `Failed to Insert Warranty! [${error.name}: ${error.message}]` });
       setSubmitLoading(false);
       return;
     }
@@ -190,7 +192,7 @@ export default function AddWarranty() {
       const finalizedPath = `${user!.id}/${warranty.id}.${fileExt}`;
       const { error: error2 } = await supabase.storage.from('images').move(tempPath, finalizedPath);
       if (error2) {
-        showMessage({ type: 'danger', message: 'Failed to Move Warranty Image!' });
+        showMessage({ type: 'danger', message: `Failed to Move Warranty Image! [${error2.name}: ${error2.message}]` });
         setSubmitLoading(false);
         return;
       }
