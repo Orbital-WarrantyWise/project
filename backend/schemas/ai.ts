@@ -11,7 +11,7 @@ const AISchema = {
     description: z.string(),
     categories: z.array(z.string()),
     price: z.number(),
-    purchase_date: z.iso.date(),
+    purchase_date: z.string().datetime(),
   }),
 
   ocrInput: z.object({

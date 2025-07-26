@@ -106,7 +106,7 @@ export default function EditWarranty() {
       purchase_date: formatDate(purchaseDate),
       expiration_date: formatDate(expirationDate),
       organisation_id: (await supabase.auth.getUser()).data.user!.user_metadata.default_organisation as number,
-      price: Number.parseInt(price),
+      price: parseFloat(price),
     };
     const { error } = await supabase.from('warranties').update(data).eq('id', Number.parseInt(params.warrantyId));
 
