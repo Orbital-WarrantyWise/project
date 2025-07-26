@@ -10,8 +10,10 @@ import { decode } from 'base64-arraybuffer';
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
 export default function AddWarranty() {
-  const [productName, setProductName] = useState('');
-  const [productCategories, setProductCategories] = useState('');
+  // TODO: Handle organisationId in search params
+  const [name, setName] = useState('');
+  const [categories, setCategories] = useState('');
+  const [price, setPrice] = useState('');
   const [openPurchaseDatePicker, setOpenPurchaseDatePicker] = useState(false);
   const [purchaseDate, setPurchaseDate] = useState(new Date());
   const [openExpirationDatePicker, setOpenExpirationDatePicker] = useState(false);
@@ -125,8 +127,9 @@ export default function AddWarranty() {
     const json = await res.json();
     console.log('Backend Response', json);
     if (json['success']) {
+      // TODO: Validate json output
       const jsonData = json['data']; // TODO: Purchase date, description, warranty duration
-      setProductName(jsonData['product_name']);
+      setName(jsonData['product_name']);
       setPurchaseDate(new Date(jsonData['purchase_date']));
       showMessage({
         type: 'success',
@@ -146,14 +149,17 @@ export default function AddWarranty() {
     if (submitLoading) return; // Just in case
     setSubmitLoading(true);
 
-    // Insert warranty data
-    const userId = (await supabase.auth.getUser()).data.user?.id;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     const data = {
-      product_name: productName,
-      product_categories: productCategories.split(','), // TODO: Also handle whitespaces
+      name: name,
+      categories: categories.split(','), // TODO: Also handle whitespaces
       purchase_date: formatDate(purchaseDate),
       expiration_date: formatDate(expirationDate),
-      user_id: userId,
+      organisation_id: user!.user_metadata.default_organisation as number,
+      price: Number.parseInt(price),
     };
     console.log('Form Data is', data);
     const { data: warranty, error } = await supabase.from('warranties').insert(data).select().single();
@@ -165,8 +171,8 @@ export default function AddWarranty() {
 
     // Move warranty image (if any)
     if (signedUrl) {
-      const tempPath = `${userId}/temp.${fileExt}`;
-      const finalizedPath = `${userId}/${warranty.id}.${fileExt}`;
+      const tempPath = `${user!.id}/temp.${fileExt}`;
+      const finalizedPath = `${user!.id}/${warranty.id}.${fileExt}`;
       const { error: error2 } = await supabase.storage.from('images').move(tempPath, finalizedPath);
       if (error2) {
         showMessage({ type: 'danger', message: 'Failed to Move Warranty Image!' });
@@ -191,21 +197,31 @@ export default function AddWarranty() {
       <Button title="Pick an image from camera roll" onPress={pickImage} />
       {signedUrl && <Image source={{ uri: signedUrl }} style={styleSheet.image} />}
 
-      <Text style={styleSheet.textLabel}>Product Name:</Text>
+      <Text style={styleSheet.textLabel}>Name:</Text>
       <TextInput
         style={styleSheet.textInput}
-        value={productName}
-        onChangeText={setProductName}
+        value={name}
+        onChangeText={setName}
         placeholder="Laptop"
         placeholderTextColor="#808080"
       />
 
-      <Text style={styleSheet.textLabel}>Product Categories (Comma-Separated):</Text>
+      <Text style={styleSheet.textLabel}>Categories (Comma-Separated):</Text>
       <TextInput
         style={styleSheet.textInput}
-        value={productCategories}
-        onChangeText={setProductCategories}
+        value={categories}
+        onChangeText={setCategories}
         placeholder="Electronics,Software"
+        placeholderTextColor="#808080"
+      />
+
+      <Text style={styleSheet.textLabel}>Price:</Text>
+      <TextInput
+        style={styleSheet.textInput}
+        value={price}
+        onChangeText={text => setPrice(text.replace(/[^0-9.,]/g, ''))}
+        keyboardType="numeric"
+        placeholder="0"
         placeholderTextColor="#808080"
       />
 

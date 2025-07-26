@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum OrganisationRole {
+  Owner
+  Admin
+  Member
+}
+
+// RLS enabled with 2 policies
+// 1. Only the organisation's members can select it
+// 2. Only the organisation's admin can insert/modify/delete it
+model Warranty {
+  id             Int          @id @default(autoincrement())
+  name           String
+  categories     String[]
+  price          Decimal      @db.Money
+  purchaseDate   DateTime     @map("purchase_date")
+  expirationDate DateTime     @map("expiration_date")
+  organisation   Organisation @relation(fields: [organisationId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  organisationId Int          @map("organisation_id")
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  @@map("warranties")
+}
+
+// RLS enabled with 0 policies - so no one can query it
+// Create database trigger to populate user from auth.users
+model User {
+  id                   String                 @id @default(uuid()) @db.Uuid
+  email                String
+  organisations        OrganisationsOnUsers[]
+  createdOrganisations Organisation[]
+
+  @@map("users")
+}
+
+// A default organisation will be created for each user
+// RLS enabled with 3 policies
+// 1. Only the organisation's members can query it
+// 2. Only the organisation's admins can modify it
+// 3. Only the organisation's owner can delete it
+model Organisation {
+  id          Int                    @id @default(autoincrement())
+  name        String
+  description String?                @default("Default organisation")
+  isCustom    Boolean                @default(false) @map("is_custom")
+  warranties  Warranty[]
+  users       OrganisationsOnUsers[]
+  createdBy   User                   @relation(fields: [ownerUserId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  ownerUserId String                 @map("owner_user_id") @db.Uuid
+  createdAt   DateTime               @default(now()) @map("created_at")
+
+  @@map("organisations")
+}
+
+// RLS enabled with 0 policies - so no one can query it
+// Create database trigger to create OrganisationsOnUsers when creating new organisation
+model OrganisationsOnUsers {
+  user           User             @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  userId         String           @map("user_id") @db.Uuid
+  organisation   Organisation     @relation(fields: [organisationId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  organisationId Int              @map("organisation_id")
+  role           OrganisationRole @default(Member)
+
+  @@id([userId, organisationId])
+  @@map("organisations_on_users")
+}

@@ -9,9 +9,9 @@ const ai = new GoogleGenAI({
 });
 
 const generateRecommendationPrompt = (
-  product_name: string,
-  product_description: string,
-  product_categories: string[],
+  name: string,
+  description: string,
+  categories: string[],
   purchase_date: string,
 ) => `
 You are an expert product recommendation AI with access to the internet.
@@ -19,9 +19,9 @@ You are an expert product recommendation AI with access to the internet.
 Your objective is to help users identify relevant replacement products when their product's warranty is about to expire.
 
 The following are the details of the user's product:
-- Product Name: ${product_name}
-- Product Description: ${product_description}
-- Product Categories: ${product_categories}
+- Product Name: ${name}
+- Product Description: ${description}
+- Product Categories: ${categories}
 - Purchase Date: ${purchase_date}
 
 Your job is to search the internet for similar replacement products (up to 7 products) based on the following guidelines:
@@ -39,18 +39,13 @@ For each replacement product, extract the following information:
 `;
 
 async function getRecommendation({
-  product_name,
-  product_description,
-  product_categories,
+  name,
+  description,
+  categories,
   purchase_date,
 }: z.infer<typeof AISchema.recommendation>) {
   try {
-    const imputedPrompt = generateRecommendationPrompt(
-      product_name,
-      product_description,
-      product_categories,
-      purchase_date,
-    );
+    const imputedPrompt = generateRecommendationPrompt(name, description, categories, purchase_date);
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: imputedPrompt,

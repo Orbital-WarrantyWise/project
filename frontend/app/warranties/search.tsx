@@ -1,26 +1,21 @@
 import { supabase } from '@/helpers/supabase';
-import type { Warranty } from '@/helpers/types';
+import type { Tables } from 'warrantywise-database/database.types';
 import React, { useEffect, useState } from 'react';
 import { View, TextInput, Text, FlatList, StyleSheet } from 'react-native';
 import { showMessage } from 'react-native-flash-message';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { dateTimeFormatter } from '@/helpers/utils';
 
-const TABLE_HEADERS = [
-  { key: 'id', label: 'ID' },
-  { key: 'product_name', label: 'Product Name' },
-  { key: 'product_categories', label: 'Product Categories' },
-  { key: 'purchase_date', label: 'Purchase Date' },
-  { key: 'expiration_date', label: 'Expiry Date' },
-];
+const TABLE_HEADERS = ['Name', 'Categories', 'Price', 'Purchase Date', 'Expiry Date'];
 
 export default function WarrantySearchPage() {
   // TODO: Add debouncing for nameQuery
   const [nameQuery, setNameQuery] = useState('');
-  const [warranties, setWarranties] = useState<Warranty[]>();
+  const [warranties, setWarranties] = useState<Tables<'warranties'>[]>();
 
   useEffect(() => {
     const search = async () => {
-      const { data, error } = await supabase.from('warranties').select().ilike('product_name', `%${nameQuery}%`);
+      const { data, error } = await supabase.from('warranties').select().ilike('name', `%${nameQuery}%`);
       if (error) {
         showMessage({ type: 'danger', message: 'Failed to Search Warranty!' });
       } else {
@@ -46,20 +41,20 @@ export default function WarrantySearchPage() {
             data={warranties}
             ListHeaderComponent={() => (
               <View style={styleSheet.table_row}>
-                {TABLE_HEADERS.map(col => (
-                  <Text key={col.key} style={[styleSheet.table_cell, styleSheet.bold_cell]}>
-                    {col.label}
+                {TABLE_HEADERS.map(header => (
+                  <Text key={header} style={[styleSheet.table_cell, styleSheet.bold_cell]}>
+                    {header}
                   </Text>
                 ))}
               </View>
             )}
             renderItem={({ item }) => (
               <View style={styleSheet.table_row}>
-                <Text style={styleSheet.table_cell}>{item.id}</Text>
-                <Text style={styleSheet.table_cell}>{item.product_name}</Text>
-                <Text style={styleSheet.table_cell}>{item.product_categories.join(',')}</Text>
-                <Text style={styleSheet.table_cell}>{item.purchase_date}</Text>
-                <Text style={styleSheet.table_cell}>{item.expiration_date}</Text>
+                <Text style={styleSheet.table_cell}>{item.name}</Text>
+                <Text style={styleSheet.table_cell}>{item.categories ? item.categories?.join(',') : ''}</Text>
+                <Text style={styleSheet.table_cell}>{item.price as string}</Text>
+                <Text style={styleSheet.table_cell}>{dateTimeFormatter.format(new Date(item.purchase_date))}</Text>
+                <Text style={styleSheet.table_cell}>{dateTimeFormatter.format(new Date(item.expiration_date))}</Text>
               </View>
             )}
             keyExtractor={item => item.id.toString()}

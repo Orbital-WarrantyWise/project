@@ -2,20 +2,16 @@ import { StyleSheet, View, FlatList, Text, Button, Modal, ScrollView } from 'rea
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
-import type { Warranty } from '@/helpers/types';
+import type { Tables } from 'warrantywise-database/database.types';
 import { useRouter } from 'expo-router';
 import Markdown from 'react-native-markdown-display';
 import { supabase } from '@/helpers/supabase';
+import { dateTimeFormatter } from '@/helpers/utils';
 
-const TABLE_HEADERS = [
-  { key: 'product_name', label: 'Product Name' },
-  { key: 'product_categories', label: 'Product Categories' },
-  { key: 'purchase_date', label: 'Purchase Date' },
-  { key: 'expiration_date', label: 'Expiry Date' },
-];
+const TABLE_HEADERS = ['Name', 'Categories', 'Price', 'Purchase Date', 'Expiry Date'];
 
 export default function GetWarranties() {
-  const [warranties, setWarranties] = useState<Warranty[]>();
+  const [warranties, setWarranties] = useState<Tables<'warranties'>[]>([]);
   const [aiRecommendation, setAiRecommendation] = useState<string>();
   const [showAIRecommendationPopup, setShowAIRecommendationPopup] = useState(false);
   const [aiRecommendationLoading, setAiRecommendationLoading] = useState(false);
@@ -33,7 +29,7 @@ export default function GetWarranties() {
     load();
   }, []);
 
-  const openAIRecommendationPopup = async (item: Warranty) => {
+  const openAIRecommendationPopup = async (item: Tables<'warranties'>) => {
     if (aiRecommendationLoading) return; // Prevents wastage of tokens as well
     const {
       data: { session },
@@ -59,9 +55,9 @@ export default function GetWarranties() {
         SUPABASE_ACCESS_TOKEN: access_token,
       },
       body: JSON.stringify({
-        product_name: item.product_name,
-        product_description: '', // TODO: Add this field to Warranty schema
-        product_categories: item.product_categories,
+        name: item.name,
+        description: '', // TODO: Add this field to Warranty schema
+        categories: item.categories,
         purchase_date: item.purchase_date,
       }),
     });
@@ -97,9 +93,9 @@ export default function GetWarranties() {
             data={warranties}
             ListHeaderComponent={() => (
               <View style={styleSheet.table_row}>
-                {TABLE_HEADERS.map(col => (
-                  <Text key={col.key} style={[styleSheet.table_cell, styleSheet.bold_cell]}>
-                    {col.label}
+                {TABLE_HEADERS.map(header => (
+                  <Text key={header} style={[styleSheet.table_cell, styleSheet.bold_cell]}>
+                    {header}
                   </Text>
                 ))}
                 <Text style={[styleSheet.table_cell, styleSheet.bold_cell]}>Edit</Text>
@@ -108,16 +104,17 @@ export default function GetWarranties() {
             )}
             renderItem={({ item }) => (
               <View style={styleSheet.table_row}>
-                <Text style={styleSheet.table_cell}>{item.product_name}</Text>
-                <Text style={styleSheet.table_cell}>{item.product_categories.join(',')}</Text>
-                <Text style={styleSheet.table_cell}>{item.purchase_date}</Text>
-                <Text style={styleSheet.table_cell}>{item.expiration_date}</Text>
+                <Text style={styleSheet.table_cell}>{item.name}</Text>
+                <Text style={styleSheet.table_cell}>{item.categories ? item.categories?.join(',') : ''}</Text>
+                <Text style={styleSheet.table_cell}>{item.price as string}</Text>
+                <Text style={styleSheet.table_cell}>{dateTimeFormatter.format(new Date(item.purchase_date))}</Text>
+                <Text style={styleSheet.table_cell}>{dateTimeFormatter.format(new Date(item.expiration_date))}</Text>
                 <View>
                   <Button
                     title="Edit"
                     onPress={() => {
                       router.navigate({
-                        pathname: '/warranty/[warrantyId]',
+                        pathname: '/warranties/[warrantyId]',
                         params: { warrantyId: item.id },
                       });
                     }}
