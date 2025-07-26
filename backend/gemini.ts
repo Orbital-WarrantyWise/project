@@ -114,7 +114,7 @@ async function getOCR({ imageUrl }: z.infer<typeof AISchema.ocrInput>) {
     const base64ImageData = Buffer.from(imageArrayBuffer).toString('base64');
     const mimeType = imageResponse.headers.get('content-type');
     if (!mimeType) {
-      throw new Error("Invalid mimeType from imageUrl");
+      throw new Error('Invalid mimeType from imageUrl');
     }
 
     const prompt = generateOCRPrompt();
@@ -188,10 +188,10 @@ async function getOCR2({ imageUrl }: z.infer<typeof AISchema.ocrInput>) {
     const ocrResponse = await fetch(process.env.PYTHON_OCR_BASE_URL + '/parse_image', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image_url: imageUrl })
+      body: JSON.stringify({ image_url: imageUrl }),
     });
     const data = await ocrResponse.json();
-    console.log("PaddleOCR Output", data)
+    console.log('PaddleOCR Output', data);
 
     // Step 2: Use Gemini to convert OCR into structured output
     const prompt = generateOCR2Prompt(data.ocr_text);
@@ -202,7 +202,7 @@ async function getOCR2({ imageUrl }: z.infer<typeof AISchema.ocrInput>) {
       contents: [
         {
           text: prompt,
-        }
+        },
       ],
       config: {
         tools: [

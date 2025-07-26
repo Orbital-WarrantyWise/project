@@ -53,35 +53,25 @@ export default function AddWarranty() {
     if (Platform.OS === 'web') {
       fileExt = image.file!.name.split('.').pop();
       if (!fileExt) {
-        showMessage({ type: 'danger', message: 'Couldn\'t extract file extension from image!' });
+        showMessage({ type: 'danger', message: "Couldn't extract file extension from image!" });
         return;
       }
-      res = await supabase.storage
-        .from('images')
-        .upload(`${userId}/temp.${fileExt}`, image.file!);
+      res = await supabase.storage.from('images').upload(`${userId}/temp.${fileExt}`, image.file!);
     } else {
       fileExt = image.uri.split('.').pop();
       if (!fileExt) {
-        showMessage({ type: 'danger', message: 'Couldn\'t extract file extension from image!' });
+        showMessage({ type: 'danger', message: "Couldn't extract file extension from image!" });
         return;
       }
-      res = await supabase.storage
-        .from('images')
-        .upload(
-          `${userId}/temp.${fileExt}`,
-          decode(image.base64!),
-          {
-            contentType: image.mimeType,
-          },
-        );
+      res = await supabase.storage.from('images').upload(`${userId}/temp.${fileExt}`, decode(image.base64!), {
+        contentType: image.mimeType,
+      });
     }
     // TODO: Handle error if uploading to storage fails
     console.log(res.error);
 
     // Generate and set signed image url, together with file extension
-    const { data, error } = await supabase.storage
-      .from('images')
-      .createSignedUrl(`${userId}/temp.${fileExt}`, 3600);
+    const { data, error } = await supabase.storage.from('images').createSignedUrl(`${userId}/temp.${fileExt}`, 3600);
     if (error) {
       // TODO: Handle error
       console.log(error);
@@ -98,12 +88,12 @@ export default function AddWarranty() {
   };
 
   const handleOCRButton1 = async () => {
-    handleOCRButton("");
-  }
+    handleOCRButton('');
+  };
 
   const handleOCRButton2 = async () => {
-    handleOCRButton("2");
-  }
+    handleOCRButton('2');
+  };
 
   const handleOCRButton = async (mode: string) => {
     if (ocrLoading || !signedUrl) return; // Just in case
@@ -172,11 +162,11 @@ export default function AddWarranty() {
       setSubmitLoading(false);
       return;
     }
-    
+
     // Move warranty image (if any)
     if (signedUrl) {
-      const tempPath = `${userId}/temp.${fileExt}`
-      const finalizedPath = `${userId}/${warranty.id}.${fileExt}`
+      const tempPath = `${userId}/temp.${fileExt}`;
+      const finalizedPath = `${userId}/${warranty.id}.${fileExt}`;
       const { error: error2 } = await supabase.storage.from('images').move(tempPath, finalizedPath);
       if (error2) {
         showMessage({ type: 'danger', message: 'Failed to Move Warranty Image!' });
