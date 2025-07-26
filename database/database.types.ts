@@ -132,6 +132,7 @@ export type Database = {
           expiration_date: string
           id: number
           name: string
+          description: string
           organisation_id: number
           price: unknown
           purchase_date: string
@@ -142,6 +143,7 @@ export type Database = {
           expiration_date: string
           id?: number
           name: string
+          description: string
           organisation_id: number
           price: unknown
           purchase_date: string
@@ -152,6 +154,7 @@ export type Database = {
           expiration_date?: string
           id?: number
           name?: string
+          description?: string
           organisation_id?: number
           price?: unknown
           purchase_date?: string

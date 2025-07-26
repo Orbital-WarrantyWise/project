@@ -12,6 +12,7 @@ export default function EditWarranty() {
   const params = useLocalSearchParams<{ warrantyId: string }>();
 
   const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const [categories, setCategories] = useState('');
   const [price, setPrice] = useState('');
   const [openPurchaseDatePicker, setOpenPurchaseDatePicker] = useState(false);
@@ -69,6 +70,7 @@ export default function EditWarranty() {
       }
 
       setName(data.name);
+      setDescription(data.description);
       setCategories(data.categories ? data.categories.join(',') : '');
       setPrice(parseFloat((data.price as string).substring(1)).toString());
       setPurchaseDate(new Date(data.purchase_date));
@@ -99,6 +101,7 @@ export default function EditWarranty() {
     setSubmitLoading(true);
     const data = {
       name: name,
+      description: description,
       categories: categories.split(','), // TODO: Also handle whitespaces
       purchase_date: formatDate(purchaseDate),
       expiration_date: formatDate(expirationDate),
@@ -162,6 +165,16 @@ export default function EditWarranty() {
         onChangeText={setName}
         placeholder="Laptop"
         placeholderTextColor="#808080"
+      />
+
+      <Text style={styleSheet.textLabel}>Description:</Text>
+      <TextInput
+        style={styleSheet.textInputMultiline}
+        value={description}
+        onChangeText={setDescription}
+        placeholder="11-inch Laptop"
+        placeholderTextColor="#808080"
+        multiline={true}
       />
 
       <Text style={styleSheet.textLabel}>Product Categories (Comma-Separated):</Text>
@@ -247,6 +260,15 @@ const styleSheet = StyleSheet.create({
   textInput: {
     marginBottom: 15,
     borderWidth: 1,
+    minWidth: 200,
+    minHeight: 20,
+  },
+  textInputMultiline: {
+    marginBottom: 15,
+    borderWidth: 1,
+    minWidth: 200,
+    minHeight: 60,
+    textAlignVertical: 'top', // For multiline
   },
   datePickerButtonViewWrapper: {
     marginBottom: 15,

@@ -8,7 +8,7 @@ import Markdown from 'react-native-markdown-display';
 import { supabase } from '@/helpers/supabase';
 import { dateTimeFormatter } from '@/helpers/utils';
 
-const TABLE_HEADERS = ['Name', 'Categories', 'Price', 'Purchase Date', 'Expiry Date'];
+const TABLE_HEADERS = ['Name', 'Description', 'Categories', 'Price', 'Purchase Date', 'Expiry Date'];
 
 export default function GetWarranties() {
   const [warranties, setWarranties] = useState<Tables<'warranties'>[]>([]);
@@ -56,8 +56,9 @@ export default function GetWarranties() {
       },
       body: JSON.stringify({
         name: item.name,
-        description: '', // TODO: Add this field to Warranty schema
+        description: item.description,
         categories: item.categories,
+        price: item.price,
         purchase_date: item.purchase_date,
       }),
     });
@@ -105,6 +106,7 @@ export default function GetWarranties() {
             renderItem={({ item }) => (
               <View style={styleSheet.table_row}>
                 <Text style={styleSheet.table_cell}>{item.name}</Text>
+                <Text style={styleSheet.table_cell}>{item.description}</Text>
                 <Text style={styleSheet.table_cell}>{item.categories ? item.categories?.join(',') : ''}</Text>
                 <Text style={styleSheet.table_cell}>{item.price as string}</Text>
                 <Text style={styleSheet.table_cell}>{dateTimeFormatter.format(new Date(item.purchase_date))}</Text>
