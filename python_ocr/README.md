@@ -23,7 +23,7 @@ pip install -r requirements.txt
 5. Run Python OCR flask app
 
 ```bash
-python app.py
+python api/index.py
 ```
 
 ## Vercel
