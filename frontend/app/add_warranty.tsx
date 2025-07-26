@@ -97,7 +97,15 @@ export default function AddWarranty() {
     setShowOCRPopup(false);
   };
 
-  const handleOCRButton = async () => {
+  const handleOCRButton1 = async () => {
+    handleOCRButton("");
+  }
+
+  const handleOCRButton2 = async () => {
+    handleOCRButton("2");
+  }
+
+  const handleOCRButton = async (mode: string) => {
     if (ocrLoading || !signedUrl) return; // Just in case
     setOcrLoading(true);
 
@@ -113,7 +121,7 @@ export default function AddWarranty() {
     }
     const { access_token } = session;
 
-    const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/ai/ocr', {
+    const res = await fetch(process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/ai/ocr' + mode, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -276,7 +284,8 @@ export default function AddWarranty() {
               <ActivityIndicator size="small" />
             ) : (
               <View style={styleSheet.button_container}>
-                <Button title="Yes" onPress={handleOCRButton} />
+                <Button title="Yes (PaddleOCR + Gemini)" onPress={handleOCRButton2} />
+                <Button title="Yes (Gemini Only)" onPress={handleOCRButton1} />
                 <Button title="No" onPress={closeOCRPopup} />
               </View>
             )}
