@@ -63,9 +63,21 @@ export default function GetWarranties() {
     });
 
     const json = await res.json();
+    if (json['success']) {
+      setAiRecommendation(json['data']);
+      showMessage({
+        type: 'success',
+        message: 'Successfully fetched AI Recommendation!',
+      });
+    } else {
+      showMessage({
+        type: 'danger',
+        message: `Error fetching AI Recommendation: ${json['error']}`,
+      });
+    }
+
     setAiRecommendationLoading(false);
     setShowAIRecommendationPopup(true);
-    setAiRecommendation(json['data']);
   };
 
   const closeAIRecommendationPopup = () => {
