@@ -266,7 +266,7 @@ ALTER TABLE ONLY "public"."warranties"
 
 
 
-CREATE POLICY "Enabe admins to insert/modify/delete warranties in organisation" ON "public"."warranties" TO "authenticated" USING ((EXISTS ( SELECT 1
+CREATE POLICY "Enable admins to insert/modify/delete warranties in organisation" ON "public"."warranties" TO "authenticated" USING ((EXISTS ( SELECT 1
    FROM "public"."organisations_on_users"
   WHERE (("organisations_on_users"."user_id" = ( SELECT "auth"."uid"() AS "uid")) AND ("organisations_on_users"."organisation_id" = "warranties"."organisation_id") AND ("organisations_on_users"."role" = ANY (ARRAY['Admin'::"public"."OrganisationRole", 'Owner'::"public"."OrganisationRole"]))))));
 
