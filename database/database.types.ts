@@ -79,16 +79,19 @@ export type Database = {
       }
       organisations_on_users: {
         Row: {
+          created_at: string
           organisation_id: number
           role: Database["public"]["Enums"]["OrganisationRole"]
           user_id: string
         }
         Insert: {
+          created_at?: string
           organisation_id: number
           role?: Database["public"]["Enums"]["OrganisationRole"]
           user_id?: string
         }
         Update: {
+          created_at?: string
           organisation_id?: number
           role?: Database["public"]["Enums"]["OrganisationRole"]
           user_id?: string
@@ -129,10 +132,11 @@ export type Database = {
         Row: {
           categories: string[] | null
           created_at: string
+          created_by: string
+          description: string | null
           expiration_date: string
           id: number
           name: string
-          description: string
           organisation_id: number
           price: unknown
           purchase_date: string
@@ -140,10 +144,11 @@ export type Database = {
         Insert: {
           categories?: string[] | null
           created_at?: string
+          created_by?: string
+          description?: string | null
           expiration_date: string
           id?: number
           name: string
-          description: string
           organisation_id: number
           price: unknown
           purchase_date: string
@@ -151,15 +156,23 @@ export type Database = {
         Update: {
           categories?: string[] | null
           created_at?: string
+          created_by?: string
+          description?: string | null
           expiration_date?: string
           id?: number
           name?: string
-          description?: string
           organisation_id?: number
           price?: unknown
           purchase_date?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "warranties_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "warranties_organisation_id_fkey"
             columns: ["organisation_id"]
