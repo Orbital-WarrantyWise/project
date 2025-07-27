@@ -161,7 +161,7 @@ export default function GetWarranties() {
                 <Text style={styleSheet.table_cell}>{item.price as string}</Text>
                 <Text style={styleSheet.table_cell}>{dateTimeFormatter.format(new Date(item.purchase_date))}</Text>
                 <Text style={styleSheet.table_cell}>{dateTimeFormatter.format(new Date(item.expiration_date))}</Text>
-                <View>
+                <View style={styleSheet.table_cell}>
                   <Button
                     title="Edit"
                     onPress={() => {
@@ -172,7 +172,7 @@ export default function GetWarranties() {
                     }}
                   />
                 </View>
-                <View>
+                <View style={styleSheet.table_cell}>
                   <Button
                     title="AI Recommendation"
                     onPress={() => {
