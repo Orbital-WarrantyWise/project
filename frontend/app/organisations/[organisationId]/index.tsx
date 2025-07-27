@@ -111,6 +111,18 @@ export default function EditWarranty() {
           }
         />
       </View>
+
+      <View style={styleSheet.submitButtonViewWrapper}>
+        <Button
+          title="Add Warranty"
+          onPress={() =>
+            router.navigate({
+              pathname: '/organisations/[organisationId]/warranties/new',
+              params: { organisationId },
+            })
+          }
+        />
+      </View>
     </View>
   );
 }
