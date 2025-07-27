@@ -31,20 +31,23 @@ export default function EditWarranty() {
         .from('images')
         .list((await supabase.auth.getUser()).data.user?.id, { search: params.warrantyId });
       if (error) {
-        // TODO: Handle error
-        console.log(error);
-      } else {
-        if (images.length !== 0) {
-          const image = images[0];
-          const { data, error } = await supabase.storage
-            .from('images')
-            .createSignedUrl(`${(await supabase.auth.getUser()).data.user?.id}/${image.name}`, 3600);
-          if (error) {
-            // TODO: Handle error
-            console.log(error);
-          } else {
-            setSignedUrl(data.signedUrl);
-          }
+        showMessage({ type: 'danger', message: `Failed to load image! [${error.name}: ${error.message}]` });
+        return;
+      }
+
+      if (images.length !== 0) {
+        const image = images[0];
+        const { data, error } = await supabase.storage
+          .from('images')
+          .createSignedUrl(`${(await supabase.auth.getUser()).data.user?.id}/${image.name}`, 3600);
+        if (error) {
+          showMessage({
+            type: 'danger',
+            message: `Failed to create signed image url! [${error.name}: ${error.message}]`,
+          });
+          return;
+        } else {
+          setSignedUrl(data.signedUrl);
         }
       }
     };
@@ -67,7 +70,7 @@ export default function EditWarranty() {
         .single();
       setSubmitLoading(false);
       if (error) {
-        // TODO: Handle error
+        showMessage({ type: 'danger', message: `Failed to load warranty! [${error.name}: ${error.message}]` });
         return;
       }
 

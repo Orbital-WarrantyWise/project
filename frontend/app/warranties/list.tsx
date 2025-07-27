@@ -21,7 +21,8 @@ export default function GetWarranties() {
     const load = async () => {
       const { data, error } = await supabase.from('warranties').select();
       if (error) {
-        // TODO: Gracefully handle error here
+        showMessage({ type: 'danger', message: `Failed to load warranties! [${error.name}: ${error.message}]` });
+        return;
       } else {
         setWarranties(data);
       }
