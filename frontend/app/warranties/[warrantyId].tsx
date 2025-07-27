@@ -10,11 +10,14 @@ import { decode } from 'base64-arraybuffer';
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
+const tempName = `temp-${Date.now()}`;
+
 export default function EditWarranty() {
   const params = useLocalSearchParams<{ warrantyId: string }>();
 
+  const [orgId, setOrgId] = useState<number>();
   const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState<string | null>(null);
   const [categories, setCategories] = useState('');
   const [price, setPrice] = useState('');
   const [openPurchaseDatePicker, setOpenPurchaseDatePicker] = useState(false);
@@ -25,34 +28,35 @@ export default function EditWarranty() {
   const [fileExt, setFileExt] = useState<string | null>(null);
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
 
+  // TODO: ASDF
   useEffect(() => {
-    const loadImage = async () => {
-      const { data: images, error } = await supabase.storage
-        .from('images')
-        .list((await supabase.auth.getUser()).data.user?.id, { search: params.warrantyId });
-      if (error) {
-        showMessage({ type: 'danger', message: `Failed to load image! [${error.name}: ${error.message}]` });
-        return;
-      }
-
-      if (images.length !== 0) {
-        const image = images[0];
-        const { data, error } = await supabase.storage
+    if (orgId) {
+      const loadImage = async () => {
+        const { data: images, error } = await supabase.storage
           .from('images')
-          .createSignedUrl(`${(await supabase.auth.getUser()).data.user?.id}/${image.name}`, 3600);
+          .list(orgId.toString(), { search: params.warrantyId });
         if (error) {
-          showMessage({
-            type: 'danger',
-            message: `Failed to create signed image url! [${error.name}: ${error.message}]`,
-          });
+          showMessage({ type: 'danger', message: `Failed to load image! [${error.name}: ${error.message}]` });
           return;
-        } else {
-          setSignedUrl(data.signedUrl);
         }
-      }
-    };
-    loadImage();
-  }, [params.warrantyId]);
+
+        if (images.length !== 0) {
+          const image = images[0];
+          const { data, error } = await supabase.storage.from('images').createSignedUrl(`${orgId}/${image.name}`, 3600);
+          if (error) {
+            showMessage({
+              type: 'danger',
+              message: `Failed to create signed image url! [${error.name}: ${error.message}]`,
+            });
+            return;
+          } else {
+            setSignedUrl(data.signedUrl);
+          }
+        }
+      };
+      loadImage();
+    }
+  }, [orgId, params.warrantyId]);
 
   const formatDate = (date: Date) => {
     return format(date, 'yyyy-MM-dd'); // Ref: https://date-fns.org/docs/format
@@ -74,6 +78,7 @@ export default function EditWarranty() {
         return;
       }
 
+      setOrgId(data.organisation_id);
       setName(data.name);
       setDescription(data.description);
       setCategories(data.categories ? data.categories.join(',') : '');
@@ -115,14 +120,14 @@ export default function EditWarranty() {
         showMessage({ type: 'danger', message: "Couldn't extract file extension from image!" });
         return;
       }
-      res = await supabase.storage.from('images').upload(`${userId}/temp.${fileExt}`, image.file!);
+      res = await supabase.storage.from('images').upload(`${userId}/${tempName}.${fileExt}`, image.file!);
     } else {
       fileExt = image.uri.split('.').pop();
       if (!fileExt) {
         showMessage({ type: 'danger', message: "Couldn't extract file extension from image!" });
         return;
       }
-      res = await supabase.storage.from('images').upload(`${userId}/temp.${fileExt}`, decode(image.base64!), {
+      res = await supabase.storage.from('images').upload(`${userId}/${tempName}.${fileExt}`, decode(image.base64!), {
         contentType: image.mimeType,
       });
     }
@@ -132,9 +137,11 @@ export default function EditWarranty() {
     }
 
     // Generate and set signed image url, together with file extension
-    const { data, error } = await supabase.storage.from('images').createSignedUrl(`${userId}/temp.${fileExt}`, 3600);
+    const { data, error } = await supabase.storage
+      .from('images')
+      .createSignedUrl(`${userId}/${tempName}.${fileExt}`, 3600);
     if (error) {
-      showMessage({ type: 'danger', message: `Failed to move temp image! [${error.name}: ${error.message}]` });
+      showMessage({ type: 'danger', message: `Failed to create signed url! [${error.name}: ${error.message}]` });
       return;
     } else {
       setFileExt(fileExt);
@@ -169,8 +176,8 @@ export default function EditWarranty() {
 
     // Move warranty image (if any)
     if (signedUrl) {
-      const tempPath = `${user!.id}/temp.${fileExt}`;
-      const finalizedPath = `${user!.id}/${params.warrantyId}.${fileExt}`;
+      const tempPath = `${user!.id}/${tempName}.${fileExt}`;
+      const finalizedPath = `${orgId}/${params.warrantyId}.${fileExt}`;
       const { error: error2 } = await supabase.storage.from('images').move(tempPath, finalizedPath);
       if (error2) {
         showMessage({ type: 'danger', message: `Failed to Move Warranty Image! [${error2.name}: ${error2.message}]` });
@@ -208,7 +215,7 @@ export default function EditWarranty() {
       <Text style={styleSheet.textLabel}>Description:</Text>
       <TextInput
         style={styleSheet.textInputMultiline}
-        value={description}
+        value={description || ''}
         onChangeText={setDescription}
         placeholder="11-inch Laptop"
         placeholderTextColor="#808080"
