@@ -6,7 +6,7 @@ import { showMessage } from 'react-native-flash-message';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { dateTimeFormatter } from '@/helpers/utils';
 
-const TABLE_HEADERS = ['Name', 'Categories', 'Price', 'Purchase Date', 'Expiry Date'];
+const TABLE_HEADERS = ['Name', 'Description', 'Categories', 'Price', 'Purchase Date', 'Expiry Date'];
 
 export default function WarrantySearchPage() {
   // TODO: Add debouncing for nameQuery
@@ -17,7 +17,7 @@ export default function WarrantySearchPage() {
     const search = async () => {
       const { data, error } = await supabase.from('warranties').select().ilike('name', `%${nameQuery}%`);
       if (error) {
-        showMessage({ type: 'danger', message: 'Failed to Search Warranty!' });
+        showMessage({ type: 'danger', message: `Failed to Search Warranty! [${error.name}: ${error.message}]` });
       } else {
         setWarranties(data);
       }
@@ -51,6 +51,7 @@ export default function WarrantySearchPage() {
             renderItem={({ item }) => (
               <View style={styleSheet.table_row}>
                 <Text style={styleSheet.table_cell}>{item.name}</Text>
+                <Text style={styleSheet.table_cell}>{item.description}</Text>
                 <Text style={styleSheet.table_cell}>{item.categories ? item.categories?.join(',') : ''}</Text>
                 <Text style={styleSheet.table_cell}>{item.price as string}</Text>
                 <Text style={styleSheet.table_cell}>{dateTimeFormatter.format(new Date(item.purchase_date))}</Text>

@@ -12,6 +12,7 @@ const generateRecommendationPrompt = (
   name: string,
   description: string,
   categories: string[],
+  price: number,
   purchase_date: string,
 ) => `
 You are an expert product recommendation AI with access to the internet.
@@ -22,6 +23,7 @@ The following are the details of the user's product:
 - Product Name: ${name}
 - Product Description: ${description}
 - Product Categories: ${categories}
+- Product Price: ${price}
 - Purchase Date: ${purchase_date}
 
 Your job is to search the internet for similar replacement products (up to 7 products) based on the following guidelines:
@@ -42,10 +44,11 @@ async function getRecommendation({
   name,
   description,
   categories,
+  price,
   purchase_date,
 }: z.infer<typeof AISchema.recommendation>) {
   try {
-    const imputedPrompt = generateRecommendationPrompt(name, description, categories, purchase_date);
+    const imputedPrompt = generateRecommendationPrompt(name, description, categories, price, purchase_date);
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: imputedPrompt,
@@ -74,7 +77,7 @@ Your objective is to goal is to extract the following information about the prod
 2. Description
 3. Price
 4. Purchase Date
-5. Warranty/Subscription Duration
+5. Expiration Date (based on the product's warranty/subscription duration)
 
 You may use the internet to convert product IDs (e.g. SKU12345XA) into product names, or to search for product descriptions. 
 
