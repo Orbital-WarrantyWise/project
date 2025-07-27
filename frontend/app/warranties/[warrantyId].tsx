@@ -10,6 +10,8 @@ import { decode } from 'base64-arraybuffer';
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
+const tempName = `temp-${Date.now()}`;
+
 export default function EditWarranty() {
   const params = useLocalSearchParams<{ warrantyId: string }>();
 
@@ -118,14 +120,14 @@ export default function EditWarranty() {
         showMessage({ type: 'danger', message: "Couldn't extract file extension from image!" });
         return;
       }
-      res = await supabase.storage.from('images').upload(`${userId}/temp.${fileExt}`, image.file!);
+      res = await supabase.storage.from('images').upload(`${userId}/${tempName}.${fileExt}`, image.file!);
     } else {
       fileExt = image.uri.split('.').pop();
       if (!fileExt) {
         showMessage({ type: 'danger', message: "Couldn't extract file extension from image!" });
         return;
       }
-      res = await supabase.storage.from('images').upload(`${userId}/temp.${fileExt}`, decode(image.base64!), {
+      res = await supabase.storage.from('images').upload(`${userId}/${tempName}.${fileExt}`, decode(image.base64!), {
         contentType: image.mimeType,
       });
     }
@@ -135,9 +137,11 @@ export default function EditWarranty() {
     }
 
     // Generate and set signed image url, together with file extension
-    const { data, error } = await supabase.storage.from('images').createSignedUrl(`${userId}/temp.${fileExt}`, 3600);
+    const { data, error } = await supabase.storage
+      .from('images')
+      .createSignedUrl(`${userId}/${tempName}.${fileExt}`, 3600);
     if (error) {
-      showMessage({ type: 'danger', message: `Failed to move temp image! [${error.name}: ${error.message}]` });
+      showMessage({ type: 'danger', message: `Failed to create signed url! [${error.name}: ${error.message}]` });
       return;
     } else {
       setFileExt(fileExt);
@@ -172,8 +176,8 @@ export default function EditWarranty() {
 
     // Move warranty image (if any)
     if (signedUrl) {
-      const tempPath = `${user!.id}/temp.${fileExt}`;
-      const finalizedPath = `${user!.id}/${params.warrantyId}.${fileExt}`;
+      const tempPath = `${user!.id}/${tempName}.${fileExt}`;
+      const finalizedPath = `${orgId}/${params.warrantyId}.${fileExt}`;
       const { error: error2 } = await supabase.storage.from('images').move(tempPath, finalizedPath);
       if (error2) {
         showMessage({ type: 'danger', message: `Failed to Move Warranty Image! [${error2.name}: ${error2.message}]` });

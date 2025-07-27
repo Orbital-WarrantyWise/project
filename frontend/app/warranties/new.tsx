@@ -92,9 +92,11 @@ export default function AddWarranty() {
     }
 
     // Generate and set signed image url, together with file extension
-    const { data, error } = await supabase.storage.from('images').createSignedUrl(`${userId}/temp.${fileExt}`, 3600);
+    const { data, error } = await supabase.storage
+      .from('images')
+      .createSignedUrl(`${userId}/${tempName}.${fileExt}`, 3600);
     if (error) {
-      showMessage({ type: 'danger', message: `Failed to move temp image! [${error.name}: ${error.message}]` });
+      showMessage({ type: 'danger', message: `Failed to move generate signed url! [${error.name}: ${error.message}]` });
       return;
     } else {
       setFileExt(fileExt);
