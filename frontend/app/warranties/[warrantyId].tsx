@@ -8,6 +8,8 @@ import { supabase } from '@/helpers/supabase';
 import * as ImagePicker from 'expo-image-picker';
 import { decode } from 'base64-arraybuffer';
 
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+
 export default function EditWarranty() {
   const params = useLocalSearchParams<{ warrantyId: string }>();
 
@@ -20,8 +22,8 @@ export default function EditWarranty() {
   const [openExpirationDatePicker, setOpenExpirationDatePicker] = useState(false);
   const [expirationDate, setExpirationDate] = useState(new Date());
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [fileExt, setFileExt] = useState<string | null>(null);
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
-  const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
 
   useEffect(() => {
     const loadImage = async () => {
@@ -82,7 +84,7 @@ export default function EditWarranty() {
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
-    let result = await ImagePicker.launchImageLibraryAsync({
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
       quality: 1,
@@ -90,15 +92,61 @@ export default function EditWarranty() {
       base64: true,
     });
 
-    if (!result.canceled) {
-      setImage(result.assets[0]);
+    // Don't do anything if user closes image picker
+    if (result.canceled) return;
+
+    // Ensure image size is less than 5 MB
+    const image = result.assets[0];
+    if (image && image.fileSize && image.fileSize >= MAX_IMAGE_SIZE) {
+      showMessage({ type: 'danger', message: 'Image exceeds 5MB, please use a smaller image!' });
+      return;
+    }
+
+    // Upload image to Supabase bucket as temp file
+    const userId = (await supabase.auth.getUser()).data.user?.id;
+    let fileExt;
+    let res;
+    if (Platform.OS === 'web') {
+      fileExt = image.file!.name.split('.').pop();
+      if (!fileExt) {
+        showMessage({ type: 'danger', message: "Couldn't extract file extension from image!" });
+        return;
+      }
+      res = await supabase.storage.from('images').upload(`${userId}/temp.${fileExt}`, image.file!);
+    } else {
+      fileExt = image.uri.split('.').pop();
+      if (!fileExt) {
+        showMessage({ type: 'danger', message: "Couldn't extract file extension from image!" });
+        return;
+      }
+      res = await supabase.storage.from('images').upload(`${userId}/temp.${fileExt}`, decode(image.base64!), {
+        contentType: image.mimeType,
+      });
+    }
+    if (res.error) {
+      showMessage({ type: 'danger', message: `Failed to upload image! [${res.error.name}: ${res.error.message}]` });
+      return;
+    }
+
+    // Generate and set signed image url, together with file extension
+    const { data, error } = await supabase.storage.from('images').createSignedUrl(`${userId}/temp.${fileExt}`, 3600);
+    if (error) {
+      showMessage({ type: 'danger', message: `Failed to move temp image! [${error.name}: ${error.message}]` });
+      return;
+    } else {
+      setFileExt(fileExt);
+      setSignedUrl(data.signedUrl);
     }
   };
 
   const handleSubmitButton = async () => {
     if (submitLoading) return; // Just in case
-
     setSubmitLoading(true);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     const data = {
       name: name,
       description: description,
@@ -112,34 +160,23 @@ export default function EditWarranty() {
 
     if (error) {
       showMessage({ type: 'danger', message: `Failed to Edit Warranty! [${error.name}: ${error.message}]` });
-    } else {
-      if (image) {
-        let res;
-        if (Platform.OS === 'web') {
-          const fileExt = image.file!.name.split('.').pop();
-          res = await supabase.storage
-            .from('images')
-            .upload(`${(await supabase.auth.getUser()).data.user?.id}/${params.warrantyId}.${fileExt}`, image.file!, {
-              upsert: true,
-            });
-        } else {
-          const fileExt = image.uri.split('.').pop();
-          res = await supabase.storage
-            .from('images')
-            .upload(
-              `${(await supabase.auth.getUser()).data.user?.id}/${params.warrantyId}.${fileExt}`,
-              decode(image.base64!),
-              {
-                contentType: image.mimeType,
-                upsert: true,
-              },
-            );
-        }
-        // TODO: Handle error if uploading to storage fails
-        console.log(res.error);
-      }
-      showMessage({ type: 'success', message: 'Successfully Edited Warranty!' });
+      setSubmitLoading(false);
+      return;
     }
+
+    // Move warranty image (if any)
+    if (signedUrl) {
+      const tempPath = `${user!.id}/temp.${fileExt}`;
+      const finalizedPath = `${user!.id}/${params.warrantyId}.${fileExt}`;
+      const { error: error2 } = await supabase.storage.from('images').move(tempPath, finalizedPath);
+      if (error2) {
+        showMessage({ type: 'danger', message: `Failed to Move Warranty Image! [${error2.name}: ${error2.message}]` });
+        setSubmitLoading(false);
+        return;
+      }
+    }
+
+    showMessage({ type: 'success', message: 'Successfully Edited Warranty!' });
     setSubmitLoading(false);
   };
 
@@ -154,9 +191,7 @@ export default function EditWarranty() {
       }}
     >
       <Button title="Pick an image from camera roll" onPress={pickImage} />
-      {signedUrl && (
-        <Image style={{ width: 80, height: 80 }} source={{ uri: image?.uri || signedUrl }} onError={console.log} />
-      )}
+      {signedUrl && <Image style={{ width: 80, height: 80 }} source={{ uri: signedUrl }} onError={console.log} />}
 
       <Text style={styleSheet.textLabel}>Product Name:</Text>
       <TextInput
