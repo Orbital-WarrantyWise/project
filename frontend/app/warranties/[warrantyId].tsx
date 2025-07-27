@@ -13,8 +13,9 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 export default function EditWarranty() {
   const params = useLocalSearchParams<{ warrantyId: string }>();
 
+  const [orgId, setOrgId] = useState<number>();
   const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState<string | null>(null);
   const [categories, setCategories] = useState('');
   const [price, setPrice] = useState('');
   const [openPurchaseDatePicker, setOpenPurchaseDatePicker] = useState(false);
@@ -25,34 +26,35 @@ export default function EditWarranty() {
   const [fileExt, setFileExt] = useState<string | null>(null);
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
 
+  // TODO: ASDF
   useEffect(() => {
-    const loadImage = async () => {
-      const { data: images, error } = await supabase.storage
-        .from('images')
-        .list((await supabase.auth.getUser()).data.user?.id, { search: params.warrantyId });
-      if (error) {
-        showMessage({ type: 'danger', message: `Failed to load image! [${error.name}: ${error.message}]` });
-        return;
-      }
-
-      if (images.length !== 0) {
-        const image = images[0];
-        const { data, error } = await supabase.storage
+    if (orgId) {
+      const loadImage = async () => {
+        const { data: images, error } = await supabase.storage
           .from('images')
-          .createSignedUrl(`${(await supabase.auth.getUser()).data.user?.id}/${image.name}`, 3600);
+          .list(orgId.toString(), { search: params.warrantyId });
         if (error) {
-          showMessage({
-            type: 'danger',
-            message: `Failed to create signed image url! [${error.name}: ${error.message}]`,
-          });
+          showMessage({ type: 'danger', message: `Failed to load image! [${error.name}: ${error.message}]` });
           return;
-        } else {
-          setSignedUrl(data.signedUrl);
         }
-      }
-    };
-    loadImage();
-  }, [params.warrantyId]);
+
+        if (images.length !== 0) {
+          const image = images[0];
+          const { data, error } = await supabase.storage.from('images').createSignedUrl(`${orgId}/${image.name}`, 3600);
+          if (error) {
+            showMessage({
+              type: 'danger',
+              message: `Failed to create signed image url! [${error.name}: ${error.message}]`,
+            });
+            return;
+          } else {
+            setSignedUrl(data.signedUrl);
+          }
+        }
+      };
+      loadImage();
+    }
+  }, [orgId, params.warrantyId]);
 
   const formatDate = (date: Date) => {
     return format(date, 'yyyy-MM-dd'); // Ref: https://date-fns.org/docs/format
@@ -74,6 +76,7 @@ export default function EditWarranty() {
         return;
       }
 
+      setOrgId(data.organisation_id);
       setName(data.name);
       setDescription(data.description);
       setCategories(data.categories ? data.categories.join(',') : '');
@@ -208,7 +211,7 @@ export default function EditWarranty() {
       <Text style={styleSheet.textLabel}>Description:</Text>
       <TextInput
         style={styleSheet.textInputMultiline}
-        value={description}
+        value={description || ''}
         onChangeText={setDescription}
         placeholder="11-inch Laptop"
         placeholderTextColor="#808080"

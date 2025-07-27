@@ -20,6 +20,8 @@ import { decode } from 'base64-arraybuffer';
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
+const tempName = `temp-${Date.now()}`;
+
 export default function AddWarranty() {
   // TODO: Handle organisationId in search params
   const [name, setName] = useState('');
@@ -70,14 +72,17 @@ export default function AddWarranty() {
         showMessage({ type: 'danger', message: "Couldn't extract file extension from image!" });
         return;
       }
-      res = await supabase.storage.from('images').upload(`${userId}/temp.${fileExt}`, image.file!);
+      res = await supabase.storage.from('images').upload(`${userId}/${tempName}.${fileExt}`, image.file!, {
+        upsert: true,
+      });
     } else {
       fileExt = image.uri.split('.').pop();
       if (!fileExt) {
         showMessage({ type: 'danger', message: "Couldn't extract file extension from image!" });
         return;
       }
-      res = await supabase.storage.from('images').upload(`${userId}/temp.${fileExt}`, decode(image.base64!), {
+      res = await supabase.storage.from('images').upload(`${userId}/${tempName}.${fileExt}`, decode(image.base64!), {
+        upsert: true,
         contentType: image.mimeType,
       });
     }
@@ -199,8 +204,9 @@ export default function AddWarranty() {
 
     // Move warranty image (if any)
     if (signedUrl) {
-      const tempPath = `${user!.id}/temp.${fileExt}`;
-      const finalizedPath = `${user!.id}/${warranty.id}.${fileExt}`;
+      const tempPath = `${user!.id}/${tempName}.${fileExt}`;
+      // TODO: Support multiple images
+      const finalizedPath = `${warranty.organisation_id}/${warranty.id}.${fileExt}`;
       const { error: error2 } = await supabase.storage.from('images').move(tempPath, finalizedPath);
       if (error2) {
         showMessage({ type: 'danger', message: `Failed to Move Warranty Image! [${error2.name}: ${error2.message}]` });
