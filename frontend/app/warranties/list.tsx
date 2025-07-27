@@ -58,7 +58,7 @@ export default function GetWarranties() {
         name: item.name,
         description: item.description,
         categories: item.categories,
-        price: parseFloat((item.price as string).substring(1)),
+        price: parseFloat((item.price as string).substring(1).replace(/,/g, '')),
         purchase_date: item.purchase_date + 'Z',
       }),
     });

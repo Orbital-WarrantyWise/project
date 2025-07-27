@@ -187,7 +187,7 @@ export default function AddWarranty() {
       purchase_date: formatDate(purchaseDate),
       expiration_date: formatDate(expirationDate),
       organisation_id: user!.user_metadata.default_organisation as number,
-      price: parseFloat(price),
+      price: parseFloat(price.replace(/,/g, '')), // Note: No need to handle $ symbol since user can't type that in anyways
     };
     console.log('Form Data is', data);
     const { data: warranty, error } = await supabase.from('warranties').insert(data).select().single();

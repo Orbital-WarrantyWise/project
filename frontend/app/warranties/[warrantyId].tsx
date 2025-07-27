@@ -72,7 +72,7 @@ export default function EditWarranty() {
       setName(data.name);
       setDescription(data.description);
       setCategories(data.categories ? data.categories.join(',') : '');
-      setPrice(parseFloat((data.price as string).substring(1)).toString());
+      setPrice(parseFloat((data.price as string).substring(1).replace(/,/g, '')).toString());
       setPurchaseDate(new Date(data.purchase_date));
       setExpirationDate(new Date(data.expiration_date));
       setSubmitLoading(false);
@@ -106,7 +106,7 @@ export default function EditWarranty() {
       purchase_date: formatDate(purchaseDate),
       expiration_date: formatDate(expirationDate),
       organisation_id: (await supabase.auth.getUser()).data.user!.user_metadata.default_organisation as number,
-      price: parseFloat(price),
+      price: parseFloat(price.replace(/,/g, '')), // Note: No need to handle $ symbol since user can't type that in anyways
     };
     const { error } = await supabase.from('warranties').update(data).eq('id', Number.parseInt(params.warrantyId));
 

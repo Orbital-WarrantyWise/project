@@ -21,7 +21,7 @@ const AISchema = {
   ocrOutput: z.object({
     product_name: z.string().describe('Human-friendly name of the product'),
     product_description: z.string().describe('Brief description of the product'),
-    product_price: z.string().describe('Price of the product'),
+    product_price: z.string().describe('Price of the product as a number, WITHOUT any currency or dollar symbol'),
     purchase_date: NullableDatetime.describe('Purchase date of the product'),
     expiration_date: NullableDatetime.describe("Expiration date of the product's warranty/subscription"),
   }),
