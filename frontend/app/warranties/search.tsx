@@ -10,35 +10,51 @@ const TABLE_HEADERS = ['Name', 'Description', 'Categories', 'Price', 'Purchase D
 
 export default function WarrantySearchPage() {
   // TODO: Add debouncing for nameQuery
-  const [nameQuery, setNameQuery] = useState('');
-  const [warranties, setWarranties] = useState<Tables<'warranties'>[]>();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredWarranties, setFilteredWarranties] = useState<Tables<'warranties'>[]>();
 
   useEffect(() => {
     const search = async () => {
-      const { data, error } = await supabase.from('warranties').select().ilike('name', `%${nameQuery}%`);
+      const { data, error } = await supabase.from('warranties').select();
       if (error) {
-        showMessage({ type: 'danger', message: `Failed to Search Warranty! [${error.name}: ${error.message}]` });
-      } else {
-        setWarranties(data);
+        showMessage({ type: 'danger', message: `Failed to Load Warranties! [${error.name}: ${error.message}]` });
+        return;
       }
+
+      // Perform client-side filtering since difficult to search via supabase, can't convert columns to strings for whatever reason...
+      const query = searchQuery.trim().toLowerCase();
+      const newFilteredWarranties = data.filter(item => {
+        const searchText = [
+          item.name,
+          item.description,
+          item.categories ? item.categories?.join(',') : '',
+          item.price as string,
+          dateTimeFormatter.format(new Date(item.purchase_date)),
+          dateTimeFormatter.format(new Date(item.expiration_date)),
+        ]
+          .join(';')
+          .toLowerCase();
+        return searchText.includes(query);
+      });
+      setFilteredWarranties(newFilteredWarranties);
     };
     search();
-  }, [nameQuery]);
+  }, [searchQuery]);
 
   return (
     <View style={styleSheet.container}>
       <Text style={styleSheet.heading}>Search Warranties</Text>
       <TextInput
         style={styleSheet.input}
-        placeholder="Enter product name..."
-        value={nameQuery}
-        onChangeText={setNameQuery}
+        placeholder="Search by name, description, category, or price"
+        value={searchQuery}
+        onChangeText={setSearchQuery}
       />
 
       <SafeAreaProvider>
         <SafeAreaView style={styleSheet.scrollableView}>
           <FlatList
-            data={warranties}
+            data={filteredWarranties}
             ListHeaderComponent={() => (
               <View style={styleSheet.table_row}>
                 {TABLE_HEADERS.map(header => (
