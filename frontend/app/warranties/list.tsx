@@ -1,4 +1,4 @@
-import { StyleSheet, View, FlatList, Text, Button, Modal, ScrollView } from 'react-native';
+import { StyleSheet, View, FlatList, Text, Button, Modal, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
@@ -11,7 +11,9 @@ import { dateTimeFormatter } from '@/helpers/utils';
 const TABLE_HEADERS = ['Name', 'Description', 'Categories', 'Price', 'Purchase Date', 'Expiry Date'];
 
 export default function GetWarranties() {
-  const [warranties, setWarranties] = useState<Tables<'warranties'>[]>([]);
+  const [sortedWarranties, setSortedWarranties] = useState<Tables<'warranties'>[]>([]);
+  const [sortedColumn, setSortedColumn] = useState<string>();
+  const [sortDirection, setSortDirection] = useState<string>();
   const [aiRecommendation, setAiRecommendation] = useState<string>();
   const [showAIRecommendationPopup, setShowAIRecommendationPopup] = useState(false);
   const [aiRecommendationLoading, setAiRecommendationLoading] = useState(false);
@@ -24,11 +26,26 @@ export default function GetWarranties() {
         showMessage({ type: 'danger', message: `Failed to load warranties! [${error.name}: ${error.message}]` });
         return;
       } else {
-        setWarranties(data);
+        setSortedWarranties(data); // Display this instead of warranties
       }
     };
     load();
   }, []);
+
+  const sortRows = (column: string) => {
+    let direction = 'asc'; // Sort in ascending by default
+    if (sortedColumn && sortedColumn == column && sortDirection == 'asc') {
+      // Clicking on same column means toggle from ascending to descending
+      direction = 'desc';
+    }
+    setSortedColumn(column);
+    setSortDirection(direction);
+  };
+
+  const getSortIndicator = (column: string) => {
+    if (!sortedColumn || sortedColumn != column) return '↕️'; // This column is not currently being sorted
+    return sortDirection == 'asc' ? '⬆️' : '⬇️';
+  };
 
   const openAIRecommendationPopup = async (item: Tables<'warranties'>) => {
     if (aiRecommendationLoading) return; // Prevents wastage of tokens as well
@@ -92,13 +109,16 @@ export default function GetWarranties() {
       <SafeAreaProvider>
         <SafeAreaView style={styleSheet.scrollableView}>
           <FlatList
-            data={warranties}
+            data={sortedWarranties}
             ListHeaderComponent={() => (
               <View style={styleSheet.table_row}>
                 {TABLE_HEADERS.map(header => (
-                  <Text key={header} style={[styleSheet.table_cell, styleSheet.bold_cell]}>
-                    {header}
-                  </Text>
+                  <TouchableOpacity key={header} style={styleSheet.table_cell} onPress={() => sortRows(header)}>
+                    <Text key={header} style={[styleSheet.table_cell, styleSheet.bold_cell]}>
+                      {header}
+                      {getSortIndicator(header)}
+                    </Text>
+                  </TouchableOpacity>
                 ))}
                 <Text style={[styleSheet.table_cell, styleSheet.bold_cell]}>Edit</Text>
                 <Text style={[styleSheet.table_cell, styleSheet.bold_cell]}>AI Recommendation</Text>
