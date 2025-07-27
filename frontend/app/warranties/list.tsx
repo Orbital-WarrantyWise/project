@@ -32,6 +32,23 @@ export default function GetWarranties() {
     load();
   }, []);
 
+  const getSortKey = (item: any, column: string) => {
+    if (column == 'Name') {
+      return item.name;
+    } else if (column == 'Description') {
+      return item.description;
+    } else if (column == 'Categories') {
+      return item.categories;
+    } else if (column == 'Price') {
+      return parseFloat((item.price as string).substring(1).replace(/,/g, ''));
+    } else if (column == 'Purchase Date') {
+      return item.purchase_date;
+    } else if (column == 'Expiry Date') {
+      return item.expiration_date;
+    }
+    return null;
+  };
+
   const sortRows = (column: string) => {
     let direction = 'asc'; // Sort in ascending by default
     if (sortedColumn && sortedColumn == column && sortDirection == 'asc') {
@@ -40,6 +57,18 @@ export default function GetWarranties() {
     }
     setSortedColumn(column);
     setSortDirection(direction);
+
+    const newSortedWarranties = [...sortedWarranties].sort((x, y) => {
+      const xVal = getSortKey(x, column);
+      const yVal = getSortKey(y, column);
+
+      // No clue why, but apparently typescript doesn't have native support for a sort direction parameter
+      if (xVal < yVal) return direction == 'asc' ? -1 : 1;
+      if (xVal > yVal) return direction == 'asc' ? 1 : -1;
+      return 0;
+    });
+    //console.log(newSortedWarranties);
+    setSortedWarranties(newSortedWarranties);
   };
 
   const getSortIndicator = (column: string) => {
