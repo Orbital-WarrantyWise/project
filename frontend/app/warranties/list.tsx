@@ -33,17 +33,17 @@ export default function GetWarranties() {
   }, []);
 
   const getSortKey = (item: any, column: string) => {
-    if (column == 'Name') {
+    if (column === 'Name') {
       return item.name;
-    } else if (column == 'Description') {
+    } else if (column === 'Description') {
       return item.description;
-    } else if (column == 'Categories') {
+    } else if (column === 'Categories') {
       return item.categories;
-    } else if (column == 'Price') {
+    } else if (column === 'Price') {
       return parseFloat((item.price as string).substring(1).replace(/,/g, ''));
-    } else if (column == 'Purchase Date') {
+    } else if (column === 'Purchase Date') {
       return item.purchase_date;
-    } else if (column == 'Expiry Date') {
+    } else if (column === 'Expiry Date') {
       return item.expiration_date;
     }
     return null;
@@ -51,7 +51,7 @@ export default function GetWarranties() {
 
   const sortRows = (column: string) => {
     let direction = 'asc'; // Sort in ascending by default
-    if (sortedColumn && sortedColumn == column && sortDirection == 'asc') {
+    if (sortedColumn && sortedColumn === column && sortDirection === 'asc') {
       // Clicking on same column means toggle from ascending to descending
       direction = 'desc';
     }
@@ -63,8 +63,8 @@ export default function GetWarranties() {
       const yVal = getSortKey(y, column);
 
       // No clue why, but apparently typescript doesn't have native support for a sort direction parameter
-      if (xVal < yVal) return direction == 'asc' ? -1 : 1;
-      if (xVal > yVal) return direction == 'asc' ? 1 : -1;
+      if (xVal < yVal) return direction === 'asc' ? -1 : 1;
+      if (xVal > yVal) return direction === 'asc' ? 1 : -1;
       return 0;
     });
     //console.log(newSortedWarranties);
@@ -72,8 +72,8 @@ export default function GetWarranties() {
   };
 
   const getSortIndicator = (column: string) => {
-    if (!sortedColumn || sortedColumn != column) return '↕️'; // This column is not currently being sorted
-    return sortDirection == 'asc' ? '⬆️' : '⬇️';
+    if (!sortedColumn || sortedColumn !== column) return '↕️'; // This column is not currently being sorted
+    return sortDirection === 'asc' ? '⬆️' : '⬇️';
   };
 
   const openAIRecommendationPopup = async (item: Tables<'warranties'>) => {
@@ -81,7 +81,7 @@ export default function GetWarranties() {
     const {
       data: { session },
     } = await supabase.auth.getSession();
-    if (session == null) {
+    if (session === null) {
       showMessage({
         type: 'danger',
         message: 'Missing Access Token! Login First!',
