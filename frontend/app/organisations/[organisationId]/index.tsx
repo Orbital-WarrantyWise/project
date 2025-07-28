@@ -3,10 +3,13 @@ import { StyleSheet, View, Text, Button, FlatList } from 'react-native';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/helpers/supabase';
 import type { Tables } from 'warrantywise-database/database.types';
+import { dateTimeFormatter } from '@/helpers/utils';
 
 type OrgMember = Tables<'organisations_on_users'> & {
   users: Tables<'users'>;
 };
+
+const TABLE_HEADERS = ['Name', 'Description', 'Categories', 'Price', 'Purchase Date', 'Expiry Date'];
 
 export default function EditWarranty() {
   const { organisationId } = useLocalSearchParams<{ organisationId: string }>();
@@ -84,8 +87,38 @@ export default function EditWarranty() {
       <Text style={styleSheet.textLabel}>Warranties</Text>
       <FlatList
         data={warranties}
-        keyExtractor={m => m.id.toString()}
-        renderItem={({ item }) => <Text style={styleSheet.textLabel}>{item.name}</Text>}
+        ListHeaderComponent={() => (
+          <View style={styleSheet.table_row}>
+            {TABLE_HEADERS.map(header => (
+              <Text key={header} style={[styleSheet.table_cell, styleSheet.bold_cell]}>
+                {header}
+              </Text>
+            ))}
+            <Text style={[styleSheet.table_cell, styleSheet.bold_cell]}>Edit</Text>
+          </View>
+        )}
+        renderItem={({ item }) => (
+          <View style={styleSheet.table_row}>
+            <Text style={styleSheet.table_cell}>{item.name}</Text>
+            <Text style={styleSheet.table_cell}>{item.description}</Text>
+            <Text style={styleSheet.table_cell}>{item.categories ? item.categories?.join(',') : ''}</Text>
+            <Text style={styleSheet.table_cell}>{item.price as string}</Text>
+            <Text style={styleSheet.table_cell}>{dateTimeFormatter.format(new Date(item.purchase_date))}</Text>
+            <Text style={styleSheet.table_cell}>{dateTimeFormatter.format(new Date(item.expiration_date))}</Text>
+            <View style={styleSheet.table_cell}>
+              <Button
+                title="Edit"
+                onPress={() => {
+                  router.navigate({
+                    pathname: '/warranties/[warrantyId]',
+                    params: { warrantyId: item.id },
+                  });
+                }}
+              />
+            </View>
+          </View>
+        )}
+        keyExtractor={item => item.id.toString()}
       />
 
       <View style={styleSheet.submitButtonViewWrapper}>
@@ -137,5 +170,19 @@ const styleSheet = StyleSheet.create({
   },
   submitButtonViewWrapper: {
     marginTop: 15,
+  },
+  table_row: {
+    flex: 1, // Needed to draw table column lines correctly
+    flexDirection: 'row', // Overflow <Text> blocks horizontally instead of vertically
+    borderBottomWidth: 1, // Only draw bottom border to prevent overlap
+  },
+  table_cell: {
+    flex: 1, // Needed to draw table column lines correctly
+    borderRightWidth: 1, // Only draw right border to prevent overlap
+    padding: 5,
+    textAlign: 'center',
+  },
+  bold_cell: {
+    fontWeight: 'bold',
   },
 });
