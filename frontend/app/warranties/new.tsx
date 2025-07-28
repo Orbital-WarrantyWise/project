@@ -55,8 +55,12 @@ export default function AddWarranty() {
     // Don't do anything if user closes image picker
     if (result.canceled) return;
 
-    // Ensure image size is less than 5 MB
+    // Ensure file is an image and image size is less than 5 MB
     const image = result.assets[0];
+    if (!image.file!) {
+      showMessage({ type: 'danger', message: "Couldn't load image!" });
+      return;
+    }
     if (image && image.fileSize && image.fileSize >= MAX_IMAGE_SIZE) {
       showMessage({ type: 'danger', message: 'Image exceeds 5MB, please use a smaller image!' });
       return;
