@@ -46,7 +46,7 @@ export default function AddMembers() {
     const {
       data: { session },
     } = await supabase.auth.getSession();
-    if (session == null) {
+    if (session === null) {
       showMessage({
         type: 'danger',
         message: 'Missing Access Token! Login First!',

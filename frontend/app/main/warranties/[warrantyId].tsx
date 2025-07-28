@@ -1,5 +1,5 @@
 import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator, Image, Platform } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { DatePickerModal } from 'react-native-paper-dates'; // Tried https://github.com/react-native-datetimepicker/datetimepicker and https://github.com/mmazzarolo/react-native-modal-datetime-picker, but both don't work on Web
 import { format } from 'date-fns';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
@@ -8,10 +8,16 @@ import { supabase } from '@/helpers/supabase';
 import * as ImagePicker from 'expo-image-picker';
 import { decode } from 'base64-arraybuffer';
 
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+
+const tempName = `temp-${Date.now()}`;
+
 export default function EditWarranty() {
   const params = useLocalSearchParams<{ warrantyId: string }>();
 
+  const [orgId, setOrgId] = useState<number>();
   const [name, setName] = useState('');
+  const [description, setDescription] = useState<string | null>(null);
   const [categories, setCategories] = useState('');
   const [price, setPrice] = useState('');
   const [openPurchaseDatePicker, setOpenPurchaseDatePicker] = useState(false);
@@ -19,34 +25,40 @@ export default function EditWarranty() {
   const [openExpirationDatePicker, setOpenExpirationDatePicker] = useState(false);
   const [expirationDate, setExpirationDate] = useState(new Date());
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [fileExt, setFileExt] = useState<string | null>(null);
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
-  const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
+  const oldImage = useRef<string>(null);
 
+  // TODO: ASDF
   useEffect(() => {
-    const loadImage = async () => {
-      const { data: images, error } = await supabase.storage
-        .from('images')
-        .list((await supabase.auth.getUser()).data.user?.id, { search: params.warrantyId });
-      if (error) {
-        // TODO: Handle error
-        console.log(error);
-      } else {
+    if (orgId) {
+      const loadImage = async () => {
+        const { data: images, error } = await supabase.storage
+          .from('images')
+          .list(orgId.toString(), { search: params.warrantyId });
+        if (error) {
+          showMessage({ type: 'danger', message: `Failed to load image! [${error.name}: ${error.message}]` });
+          return;
+        }
+
         if (images.length !== 0) {
           const image = images[0];
-          const { data, error } = await supabase.storage
-            .from('images')
-            .createSignedUrl(`${(await supabase.auth.getUser()).data.user?.id}/${image.name}`, 3600);
+          const { data, error } = await supabase.storage.from('images').createSignedUrl(`${orgId}/${image.name}`, 3600);
           if (error) {
-            // TODO: Handle error
-            console.log(error);
+            showMessage({
+              type: 'danger',
+              message: `Failed to create signed image url! [${error.name}: ${error.message}]`,
+            });
+            return;
           } else {
             setSignedUrl(data.signedUrl);
+            oldImage.current = `${orgId}/${image.name}`;
           }
         }
-      }
-    };
-    loadImage();
-  }, [params.warrantyId]);
+      };
+      loadImage();
+    }
+  }, [orgId, params.warrantyId]);
 
   const formatDate = (date: Date) => {
     return format(date, 'yyyy-MM-dd'); // Ref: https://date-fns.org/docs/format
@@ -64,13 +76,15 @@ export default function EditWarranty() {
         .single();
       setSubmitLoading(false);
       if (error) {
-        // TODO: Handle error
+        showMessage({ type: 'danger', message: `Failed to load warranty! [${error.name}: ${error.message}]` });
         return;
       }
 
+      setOrgId(data.organisation_id);
       setName(data.name);
+      setDescription(data.description);
       setCategories(data.categories ? data.categories.join(',') : '');
-      setPrice(parseFloat((data.price as string).substring(1)).toString());
+      setPrice(parseFloat((data.price as string).substring(1).replace(/,/g, '')).toString());
       setPurchaseDate(new Date(data.purchase_date));
       setExpirationDate(new Date(data.expiration_date));
       setSubmitLoading(false);
@@ -80,7 +94,7 @@ export default function EditWarranty() {
 
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
-    let result = await ImagePicker.launchImageLibraryAsync({
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
       quality: 1,
@@ -88,55 +102,104 @@ export default function EditWarranty() {
       base64: true,
     });
 
-    if (!result.canceled) {
-      setImage(result.assets[0]);
+    // Don't do anything if user closes image picker
+    if (result.canceled) return;
+
+    // Ensure file is an image and image size is less than 5 MB
+    const image = result.assets[0];
+    if (!image.file!) {
+      showMessage({ type: 'danger', message: "Couldn't load image!" });
+      return;
+    }
+    if (image && image.fileSize && image.fileSize >= MAX_IMAGE_SIZE) {
+      showMessage({ type: 'danger', message: 'Image exceeds 5MB, please use a smaller image!' });
+      return;
+    }
+
+    // Upload image to Supabase bucket as temp file
+    const userId = (await supabase.auth.getUser()).data.user?.id;
+    let fileExt;
+    let res;
+    if (Platform.OS === 'web') {
+      fileExt = image.file!.name.split('.').pop();
+      if (!fileExt) {
+        showMessage({ type: 'danger', message: "Couldn't extract file extension from image!" });
+        return;
+      }
+      res = await supabase.storage.from('images').upload(`${userId}/${tempName}.${fileExt}`, image.file!, {
+        upsert: true,
+      });
+    } else {
+      fileExt = image.uri.split('.').pop();
+      if (!fileExt) {
+        showMessage({ type: 'danger', message: "Couldn't extract file extension from image!" });
+        return;
+      }
+      res = await supabase.storage.from('images').upload(`${userId}/${tempName}.${fileExt}`, decode(image.base64!), {
+        upsert: true,
+        contentType: image.mimeType,
+      });
+    }
+    if (res.error) {
+      showMessage({ type: 'danger', message: `Failed to upload image! [${res.error.name}: ${res.error.message}]` });
+      return;
+    }
+
+    // Generate and set signed image url, together with file extension
+    const { data, error } = await supabase.storage
+      .from('images')
+      .createSignedUrl(`${userId}/${tempName}.${fileExt}`, 3600);
+    if (error) {
+      showMessage({ type: 'danger', message: `Failed to create signed url! [${error.name}: ${error.message}]` });
+      return;
+    } else {
+      setFileExt(fileExt);
+      setSignedUrl(data.signedUrl);
     }
   };
 
   const handleSubmitButton = async () => {
     if (submitLoading) return; // Just in case
-
     setSubmitLoading(true);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     const data = {
       name: name,
+      description: description,
       categories: categories.split(','), // TODO: Also handle whitespaces
       purchase_date: formatDate(purchaseDate),
       expiration_date: formatDate(expirationDate),
       organisation_id: (await supabase.auth.getUser()).data.user!.user_metadata.default_organisation as number,
-      price: Number.parseInt(price),
+      price: parseFloat(price.replace(/,/g, '')), // Note: No need to handle $ symbol since user can't type that in anyways
     };
     const { error } = await supabase.from('warranties').update(data).eq('id', Number.parseInt(params.warrantyId));
 
     if (error) {
-      showMessage({ type: 'danger', message: 'Failed to Edit Warranty!' });
-    } else {
-      if (image) {
-        let res;
-        if (Platform.OS === 'web') {
-          const fileExt = image.file!.name.split('.').pop();
-          res = await supabase.storage
-            .from('images')
-            .upload(`${(await supabase.auth.getUser()).data.user?.id}/${params.warrantyId}.${fileExt}`, image.file!, {
-              upsert: true,
-            });
-        } else {
-          const fileExt = image.uri.split('.').pop();
-          res = await supabase.storage
-            .from('images')
-            .upload(
-              `${(await supabase.auth.getUser()).data.user?.id}/${params.warrantyId}.${fileExt}`,
-              decode(image.base64!),
-              {
-                contentType: image.mimeType,
-                upsert: true,
-              },
-            );
-        }
-        // TODO: Handle error if uploading to storage fails
-        console.log(res.error);
-      }
-      showMessage({ type: 'success', message: 'Successfully Edited Warranty!' });
+      showMessage({ type: 'danger', message: `Failed to Edit Warranty! [${error.name}: ${error.message}]` });
+      setSubmitLoading(false);
+      return;
     }
+
+    // Move warranty image (if any)
+    if (signedUrl) {
+      // Delete existing image (if any)
+      if (oldImage.current) {
+        await supabase.storage.from('images').remove([oldImage.current]);
+      }
+      const tempPath = `${user!.id}/${tempName}.${fileExt}`;
+      const finalizedPath = `${orgId}/${params.warrantyId}.${fileExt}`;
+      const { error: error2 } = await supabase.storage.from('images').move(tempPath, finalizedPath);
+      if (error2) {
+        showMessage({ type: 'danger', message: `Failed to Move Warranty Image! [${error2.name}: ${error2.message}]` });
+        setSubmitLoading(false);
+        return;
+      }
+    }
+
+    showMessage({ type: 'success', message: 'Successfully Edited Warranty!' });
     setSubmitLoading(false);
   };
 
@@ -151,9 +214,7 @@ export default function EditWarranty() {
       }}
     >
       <Button title="Pick an image from camera roll" onPress={pickImage} />
-      {signedUrl && (
-        <Image style={{ width: 80, height: 80 }} source={{ uri: image?.uri || signedUrl }} onError={console.log} />
-      )}
+      {signedUrl && <Image style={{ width: 80, height: 80 }} source={{ uri: signedUrl }} onError={console.log} />}
 
       <Text style={styleSheet.textLabel}>Product Name:</Text>
       <TextInput
@@ -162,6 +223,16 @@ export default function EditWarranty() {
         onChangeText={setName}
         placeholder="Laptop"
         placeholderTextColor="#808080"
+      />
+
+      <Text style={styleSheet.textLabel}>Description:</Text>
+      <TextInput
+        style={styleSheet.textInputMultiline}
+        value={description || ''}
+        onChangeText={setDescription}
+        placeholder="11-inch Laptop"
+        placeholderTextColor="#808080"
+        multiline={true}
       />
 
       <Text style={styleSheet.textLabel}>Product Categories (Comma-Separated):</Text>
@@ -247,6 +318,15 @@ const styleSheet = StyleSheet.create({
   textInput: {
     marginBottom: 15,
     borderWidth: 1,
+    minWidth: 200,
+    minHeight: 20,
+  },
+  textInputMultiline: {
+    marginBottom: 15,
+    borderWidth: 1,
+    minWidth: 200,
+    minHeight: 60,
+    textAlignVertical: 'top', // For multiline
   },
   datePickerButtonViewWrapper: {
     marginBottom: 15,
