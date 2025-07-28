@@ -126,7 +126,9 @@ export default function EditWarranty() {
         showMessage({ type: 'danger', message: "Couldn't extract file extension from image!" });
         return;
       }
-      res = await supabase.storage.from('images').upload(`${userId}/${tempName}.${fileExt}`, image.file!);
+      res = await supabase.storage.from('images').upload(`${userId}/${tempName}.${fileExt}`, image.file!, {
+        upsert: true,
+      });
     } else {
       fileExt = image.uri.split('.').pop();
       if (!fileExt) {
@@ -134,6 +136,7 @@ export default function EditWarranty() {
         return;
       }
       res = await supabase.storage.from('images').upload(`${userId}/${tempName}.${fileExt}`, decode(image.base64!), {
+        upsert: true,
         contentType: image.mimeType,
       });
     }
