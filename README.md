@@ -18,9 +18,9 @@ If you would like to deploy WarrantyWise locally, please follow the instructions
 
 ## Features
 
-1. Users can add and store warranty details, including product name, product category, purchase date, expiration date, and documents such as receipts/invoices
-2. Users can quickly search for warranties by product name, product category, purchase date, or expiration date
-3. Users receive email or push notifications when warranties are nearing expiration
+1. Users can add and store warranty details, including product name, product category, purchase date, expiration date, and images such as receipts/invoices
+2. Users can edit details of existing warranties, including product name, product category, purchase date, expiration date, and images such as receipts/invoices
+3. Users can quickly search for warranties by product name, product category, purchase date, or expiration date
 4. Users can scan and automatically extract warranty details from receipts or invoices (e.g. via OCR)
 5. When a warranty expires, AI suggests similar or replacement products based on web searches (e.g. via OpenAI's Operator API)
 6. Families or small businesses can share access and collectively manage warranties
@@ -35,16 +35,16 @@ If you would like to deploy WarrantyWise locally, please follow the instructions
   - [x] Deploy a simple working version on Vercel and Supabase
 - Milestone 2 - Prototype (i.e., a working system with the core features)
   - [x] Implement the search functionality (Feature 2)
-  - [ ] Develop email/push notifications for expiring warranties (Feature 3)
-  - [ ] Improve the UI/UX for warranty management
-  - [ ] Conduct user testing and iterate based on feedback
+  - [x] Allow users to manually edit warranty details (Feature 3)
+  - [x] Improve the UI/UX for warranty management
+  - [x] Conduct user testing and iterate based on feedback
 - Milestone 3 - Extended system (i.e., a working system with both the core + extension features)
-  - [ ] Implement OCR-based warranty extraction (Feature 4)
-  - [ ] Add AI-powered product suggestions (Feature 5)
-  - [ ] Enable shared access for family/small business use (Feature 6)
-  - [ ] Optimize performance, security, and mobile responsiveness
-  - [ ] Conduct extensive testing and bug fixes
-  - [ ] Deploy a stable version with all core and extension features
+  - [x] Implement OCR-based warranty extraction (Feature 4)
+  - [x] Add AI-powered product suggestions (Feature 5)
+  - [x] Enable shared access for family/small business use (Feature 6)
+  - [x] Optimize performance, security, and mobile responsiveness
+  - [x] Conduct extensive testing and bug fixes
+  - [x] Deploy a stable version with all core and extension features
 
 ## Tech Stack
 
@@ -52,10 +52,7 @@ If you would like to deploy WarrantyWise locally, please follow the instructions
 2. Backend: Express
 3. Database: Supabase
 4. Deployment: Vercel
-5. AI Integration: OpenAI, Tesseract OCR
-6. Notifications: Twilio
-7. Authentication: NextAuth, Google SSO
-8. Containerization: Docker
+5. AI Integration: Google Gemini, Flask, PaddleOCR
 
 ## Style Guide
 
