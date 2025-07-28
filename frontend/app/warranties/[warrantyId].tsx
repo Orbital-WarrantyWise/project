@@ -1,5 +1,5 @@
 import { StyleSheet, View, Text, TextInput, Button, ActivityIndicator, Image, Platform } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { DatePickerModal } from 'react-native-paper-dates'; // Tried https://github.com/react-native-datetimepicker/datetimepicker and https://github.com/mmazzarolo/react-native-modal-datetime-picker, but both don't work on Web
 import { format } from 'date-fns';
 import FlashMessage, { showMessage } from 'react-native-flash-message';
@@ -27,6 +27,7 @@ export default function EditWarranty() {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [fileExt, setFileExt] = useState<string | null>(null);
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
+  const oldImage = useRef<string>(null);
 
   // TODO: ASDF
   useEffect(() => {
@@ -51,6 +52,7 @@ export default function EditWarranty() {
             return;
           } else {
             setSignedUrl(data.signedUrl);
+            oldImage.current = `${orgId}/${image.name}`;
           }
         }
       };
@@ -124,7 +126,9 @@ export default function EditWarranty() {
         showMessage({ type: 'danger', message: "Couldn't extract file extension from image!" });
         return;
       }
-      res = await supabase.storage.from('images').upload(`${userId}/${tempName}.${fileExt}`, image.file!);
+      res = await supabase.storage.from('images').upload(`${userId}/${tempName}.${fileExt}`, image.file!, {
+        upsert: true,
+      });
     } else {
       fileExt = image.uri.split('.').pop();
       if (!fileExt) {
@@ -132,6 +136,7 @@ export default function EditWarranty() {
         return;
       }
       res = await supabase.storage.from('images').upload(`${userId}/${tempName}.${fileExt}`, decode(image.base64!), {
+        upsert: true,
         contentType: image.mimeType,
       });
     }
@@ -180,6 +185,10 @@ export default function EditWarranty() {
 
     // Move warranty image (if any)
     if (signedUrl) {
+      // Delete existing image (if any)
+      if (oldImage.current) {
+        await supabase.storage.from('images').remove([oldImage.current]);
+      }
       const tempPath = `${user!.id}/${tempName}.${fileExt}`;
       const finalizedPath = `${orgId}/${params.warrantyId}.${fileExt}`;
       const { error: error2 } = await supabase.storage.from('images').move(tempPath, finalizedPath);
